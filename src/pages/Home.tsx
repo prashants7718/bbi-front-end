@@ -1,45 +1,47 @@
 import { useState } from "react";
-import Popup from "../components/Popup";
+import Popup from "../components/layout/Popup"; 
+import LoginForm from "../components/auth/LoginForm"; 
+import SignupForm from "../components/auth/SignupForm"; 
+import Layout from "../components/layout/Layout";
 
 const Home = () => {
-  const [isLoginPopupOpen, setIsLoginPopupOpen] = useState(false);
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [popupMode, setPopupMode] = useState<"login" | "signup">("login");
 
-  const handleLogin = () => {
-    setMode("login")
-    setIsLoginPopupOpen(true);
+  const handleOpenPopup = (mode: "login" | "signup") => {
+    setPopupMode(mode);
+    setIsPopupOpen(true);
   };
-const  handleSignup=()=>{
-  setMode('signup')
-  setIsLoginPopupOpen(true)
-}
 
   return (
+    <Layout>
     <div className="flex flex-col items-center justify-center mt-20">
-      <div className="w-full max-w-3xl p-6 bg-white rounded-lg shadow-lg ">
-        <h1 className="text-4xl font-bold text-[#004c80] text-center mb-6">
-          Welcome to BBI
-        </h1>
-        <div className="flex justify-center space-x-6">
+      <div className="w-full max-w-lg p-6 bg-grayBackground rounded-lg shadow-lg text-center">
+        <h1 className="text-4xl font-bold text-primaryBlue mb-6">Welcome to BBI</h1>
+        <div className="flex justify-center space-x-4">
           <button
-            className="px-6 py-3 text-white bg-[#f88da7] hover:bg-[#ff647f] font-semibold rounded-full shadow transition duration-300"
-            onClick={handleLogin}
+            className="px-6 py-3 bg-secondaryPink text-white font-semibold rounded-full shadow hover:bg-pink-500"
+            onClick={() => handleOpenPopup("login")}
           >
             Login
           </button>
-          <button className="px-6 py-3 text-white bg-[#ffc3e1] hover:bg-[#ff94c2] font-semibold rounded-full shadow transition duration-300" onClick={ handleSignup}>
+          <button
+            className="px-6 py-3 bg-primaryPink text-white font-semibold rounded-full shadow hover:bg-pink-400"
+            onClick={() => handleOpenPopup("signup")}
+          >
             Sign Up
           </button>
         </div>
       </div>
-      {isLoginPopupOpen && (
-        <Popup
-          isLoginPopupOpen={isLoginPopupOpen}
-          setIsLoginPopupOpen={setIsLoginPopupOpen}
-          mode={mode}
-        />
-      )}
+      <Popup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)}>
+        {popupMode === "login" ? (
+          <LoginForm onClose={() => setIsPopupOpen(false)} />
+        ) : (
+          <SignupForm onClose={() => setIsPopupOpen(false)} />
+        )}
+      </Popup>
     </div>
+    </Layout>
   );
 };
 

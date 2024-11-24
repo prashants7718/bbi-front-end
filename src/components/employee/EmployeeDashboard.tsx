@@ -46,7 +46,7 @@ const EmployeeDashboard = () => {
 
   return (
     <Layout>
-      <div className="flex h-screen">
+      <div className="flex">
         {/* Main Content */}
         <div className="flex-1 p-6">
           <h2 className="text-3xl font-bold text-primaryBlue mb-6">Dashboard</h2>
