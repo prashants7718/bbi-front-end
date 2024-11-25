@@ -15,7 +15,7 @@ const AvailableTest = () => {
   );
   const handleStartClick = (testName: string) => {
     console.log("testName======", testName);
-     setCurrentTestName(testName);
+    setCurrentTestName(testName);
     setStartTest(true);
   };
 
@@ -87,7 +87,7 @@ const AvailableTest = () => {
           </div>
         </div>
       </div>
-      {startTest && (
+      {/* {startTest && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="w-full max-w-sm p-3 bg-white rounded shadow-lg">
             <h2 className="mb-4 text-lg font-normal text-blue-900 text-center">
@@ -104,6 +104,43 @@ const AvailableTest = () => {
               <button
                 onClick={handleStartTest}
                 className="px-4 py-1 text-gray-700 bg-gray-300 hover:bg-primaryBlue hover:text-white rounded-full"
+              >
+                Start
+              </button>
+            </div>
+          </div>
+        </div>
+      )} */}
+      {startTest && (
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+          aria-live="polite"
+        >
+          <div className="w-full max-w-sm p-5 bg-white rounded-lg shadow-lg transform transition-transform scale-100">
+            <h2
+              id="test-dialog-title"
+              className="mb-6 text-xl font-semibold text-center text-blue-900"
+            >
+              Ready to start your test?
+            </h2>
+            <p
+              id="test-dialog-description"
+              className="mb-6 text-base text-center text-gray-700"
+            >
+              Click "Start" to begin your test journey or "Cancel" to exit.
+            </p>
+            <div className="flex items-center justify-center space-x-4">
+              <button
+                onClick={() => setStartTest(false)}
+                className="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
+                aria-label="Cancel test"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleStartTest}
+                className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                aria-label="Start test"
               >
                 Start
               </button>

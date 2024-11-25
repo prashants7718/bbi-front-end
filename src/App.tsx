@@ -9,7 +9,7 @@ import AvailableTest from './components/employee/AvailableTest';
 import Archive from './components/employee/Archive';
 import TestComponent from './components/employee/TestComponent';
 
- const isAuthenticated = (): boolean => {
+ export const isAuthenticated = (): boolean => {
   try {
     const userCookie = Cookies.get('user');
     if (userCookie) {

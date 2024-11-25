@@ -14,7 +14,9 @@ const TestComponent = () => {
   const [responses, setResponses] = useState<{ [key: number]: string }>({});
   const [selectedAnswer, setSelectedAnswer] = useState<string>("");
   const [score, setScore] = useState<number>(0);
-  const [isAnswerSaved, setIsAnswerSaved] = useState<boolean>(false);
+  const [isAnswerSavedArray, setIsAnswerSavedArray] = useState<boolean[]>(
+    new Array(questions.length).fill(false)
+  );
 
   const timeRemainingString =
     testData.find((test) => test.name === testName)?.timeRemaining ?? "0 mins";
@@ -53,7 +55,9 @@ const TestComponent = () => {
     }
 
     setResponses({ ...responses, [currentQuestionIndex]: selectedAnswer });
-    setIsAnswerSaved(true); 
+    const updatedAnswerSavedArray = [...isAnswerSavedArray];
+    updatedAnswerSavedArray[currentQuestionIndex] = true;
+    setIsAnswerSavedArray(updatedAnswerSavedArray);
   };
 
   const handleNext = () => {
@@ -61,10 +65,9 @@ const TestComponent = () => {
       alert("Please save your answer before proceeding.");
       return;
     }
-    handleSave()
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
-      setSelectedAnswer(""); // Reset the selected answer for the next question
+      setSelectedAnswer("");
     } else {
       alert(`Test completed! Your final score is ${score}.`);
       navigate("/available-tests");
@@ -96,8 +99,7 @@ const TestComponent = () => {
   };
   return (
     <Layout>
-      {" "}
-      <div className="flex justify-start bg-gray-100 shadow-lg rounded-md h-full/2">
+      <div className="flex justify-start bg-gray-100 shadow-lg rounded-md h-full/2 pt-4 pl-6 pr-6 pb-4">
         <div className="w-full m-8">
           <h2 className="text-2xl font-bold text-primaryBlue mb-4 text-left">
             {testName} Test
@@ -109,7 +111,7 @@ const TestComponent = () => {
             </p>
             <p>{formatTime(timeLeft)}</p>
           </div>
-          <p className="text-base text-gray-600 text-start">
+          <p className="text-sm text-gray-600 text-start">
             {completedQuestions} Question{completedQuestions !== 1 ? "s" : ""}{" "}
             completed
           </p>
@@ -119,11 +121,9 @@ const TestComponent = () => {
               style={{ width: `${progressPercentage}%` }}
             ></div>
           </div>
-
           <p className="mb-6 text-2xl font-bold text-gray-800">
             {currentQuestion.question}
           </p>
-
           <div className="flex flex-col space-y-4">
             {OPTIONS.map((option, index) => (
               <label key={index} className="flex items-center space-x-3">
@@ -148,9 +148,9 @@ const TestComponent = () => {
             </button>
             <button
               onClick={handleNext}
-              disabled={!isAnswerSaved}
+              disabled={!isAnswerSavedArray[currentQuestionIndex]} 
               className={`px-4 py-1 rounded-full ${
-                !isAnswerSaved
+                !isAnswerSavedArray[currentQuestionIndex]
                   ? "bg-gray-300 text-gray-700 cursor-not-allowed"
                   : "bg-primaryBlue text-white hover:bg-primaryBlue"
               }`}
