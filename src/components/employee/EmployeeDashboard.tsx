@@ -3,15 +3,16 @@ import "chart.js/auto";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; // Font Awesome component
 import { faPlayCircle } from "@fortawesome/free-solid-svg-icons"; // Play Circle icon
 import Layout from "../layout/Layout";
+import { useNavigate } from "react-router-dom";
+ export const testData = [
+  { id: 1, name: "ADHD", status: "Not Started", timeRemaining: "5 mins" },
+  { id: 2, name: "Autism", status: "Not Started", timeRemaining: "15 mins" },
+  { id: 3, name: "Dyslexia", status: "Completed", timeRemaining: "4 mins" },
+  { id: 4, name: "Dyscalculia", status: "In Progress", timeRemaining: "5 mins" },
+];
 
 const EmployeeDashboard = () => {
-  const testData = [
-    { id: 1, name: "Test 1", status: "Not Started", timeRemaining: "30 mins" },
-    { id: 2, name: "Test 2", status: "In Progress", timeRemaining: "15 mins" },
-    { id: 3, name: "Test 3", status: "Completed", timeRemaining: "0 mins" },
-    { id: 4, name: "Test 4", status: "In Progress", timeRemaining: "5 mins" },
-  ];
-
+  const navigate=useNavigate()
   const statusCounts = {
     "Not Started": testData.filter((test) => test.status === "Not Started").length,
     "In Progress": testData.filter((test) => test.status === "In Progress").length,
@@ -40,9 +41,9 @@ const EmployeeDashboard = () => {
     },
   };
 
-  const handleStartClick = (test) => {
-    alert(`Starting or continuing: ${test.name}`);
-  };
+  const handleStartClick = (testName:string) => {
+    alert(`Starting or continuing: ${testName}`);
+    navigate(`/test/${testName}`)  };
 
   return (
     <Layout>
@@ -85,7 +86,7 @@ const EmployeeDashboard = () => {
                         {test.status !== "Completed" && (
                           <FontAwesomeIcon
                             icon={faPlayCircle}
-                            onClick={() => handleStartClick(test)}
+                            onClick={() => handleStartClick(test.name)}
                             className="cursor-pointer text-blue-500 hover:text-blue-600"
                             title="Start or Continue Test"
                             size="lg"

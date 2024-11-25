@@ -5,9 +5,11 @@ import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import { Roles } from './constant/enum';
 import Cookies from 'js-cookie';
+import AvailableTest from './components/employee/AvailableTest';
+import Archive from './components/employee/Archive';
+import TestComponent from './components/employee/TestComponent';
 
-// Helper function to check authentication
-const isAuthenticated = (): boolean => {
+ const isAuthenticated = (): boolean => {
   try {
     const userCookie = Cookies.get('user');
     if (userCookie) {
@@ -45,6 +47,9 @@ const App: React.FC = () => {
             </PrivateRoute>
           }
         />
+        <Route path="/available-tests" element={<AvailableTest/>} />
+        <Route path="/archive" element={<Archive/>} />
+        <Route path="/test/:testName" element={<TestComponent/>} />
       </Routes>
     </div>
   );

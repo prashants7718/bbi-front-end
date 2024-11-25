@@ -36,7 +36,7 @@ const Sidebar: React.FC<{ role: Roles }> = ({ role }) => {
         {menuItems.map((item) => (
           <div key={item.href} className="p-1">
             <Link
-              className={`px-4 py-2 bg-lightPink hover:bg-lightPink rounded-md cursor-pointer flex  ${
+              className={`px-4 py-2 bg-lightPink  rounded-md cursor-pointer flex  ${
               location.pathname.includes(item.href) ? "bg-primaryBlue text-white font-semibold" : "text-primaryBlue"
             }`}
               to={item.href}
