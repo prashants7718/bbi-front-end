@@ -1,23 +1,28 @@
-import React from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
-import './App.css';
-import Home from './pages/Home';
-import Dashboard from './pages/Dashboard';
-import { Roles } from './constant/enum';
-import Cookies from 'js-cookie';
-import AvailableTest from './components/employee/AvailableTest';
-import Archive from './components/employee/Archive';
-import TestComponent from './components/employee/TestComponent';
+import Cookies from "js-cookie";
+import React from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import "./App.css";
+import Archive from "./components/employee/Archive";
+import Assessment from "./components/employee/Assessment";
+import AvailableTest from "./components/employee/AvailableTest";
+import Settings from "./components/manager/Settings";
+import TeamMatching from "./components/manager/TeamMatching";
+import { Roles } from "./constant/enum";
+import Dashboard from "./pages/Dashboard";
+import Home from "./pages/Home";
+import UserManagement from "./components/manager/UserManagement";
+import Teams from "./components/manager/Teams";
+import InvitationDialog from "./pages/InvitationDialog";
 
- export const isAuthenticated = (): boolean => {
+export const isAuthenticated = (): boolean => {
   try {
-    const userCookie = Cookies.get('user');
+    const userCookie = Cookies.get("user");
     if (userCookie) {
       const username = JSON.parse(userCookie)?.username;
       return !!username; // Returns true if username exists, otherwise false
     }
   } catch (error) {
-    console.error('Failed to parse cookie data:', error);
+    console.error("Failed to parse cookie data:", error);
   }
   return false;
 };
@@ -43,14 +48,18 @@ const App: React.FC = () => {
           path="/dashboard"
           element={
             <PrivateRoute>
-              <Dashboard role={Roles.EMPLOYEE} />
+              <Dashboard role={Roles.MANAGER} />
             </PrivateRoute>
           }
         />
-        <Route path="/available-tests" element={<AvailableTest/>} />
-        <Route path="/archive" element={<Archive/>} />
-        <Route path="/test/:testName" element={<TestComponent/>} />
-      </Routes>
+        <Route path="/available-tests" element={<AvailableTest />} />
+        <Route path="/archive" element={<Archive />} />
+        <Route path="/test/:testName" element={<Assessment />} />
+        <Route path="/team-matching" element={<TeamMatching />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/user-management" element={<UserManagement />} />
+        <Route path="/teams" element={<Teams />} />
+       </Routes>
     </div>
   );
 };

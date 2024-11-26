@@ -3,26 +3,26 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlayCircle } from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { testData } from "./EmployeeDashboard";
+import AssessmentStartDialog from "../../pages/AssessmentStartDialog";
 import Layout from "../layout/Layout";
+import Popup from "../layout/Popup";
+import { testData } from "./EmployeeDashboard";
 
 const AvailableTest = () => {
-  const [startTest, setStartTest] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [currentTestName, setCurrentTestName] = useState("");
   const navigate = useNavigate();
   const availableTest = testData.filter(
     (test) => test.status === "Not Started"
   );
   const handleStartClick = (testName: string) => {
-    console.log("testName======", testName);
     setCurrentTestName(testName);
-    setStartTest(true);
+    setIsPopupOpen(true);
   };
 
   const handleStartTest = () => {
     navigate(`/test/${currentTestName}`);
-    console.log("start Test");
-    setStartTest(false);
+    setIsPopupOpen(false);
   };
   return (
     <Layout>
@@ -87,67 +87,12 @@ const AvailableTest = () => {
           </div>
         </div>
       </div>
-      {/* {startTest && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-full max-w-sm p-3 bg-white rounded shadow-lg">
-            <h2 className="mb-4 text-lg font-normal text-blue-900 text-center">
-              Let’s begin! Click ‘Start’ to begin your test journey.
-            </h2>
-
-            <div className="flex items-center justify-center space-x-2">
-              <button
-                onClick={() => setStartTest(false)}
-                className="px-4 py-1 text-gray-700 bg-gray-300 hover:bg-primaryBlue hover:text-white rounded-full"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleStartTest}
-                className="px-4 py-1 text-gray-700 bg-gray-300 hover:bg-primaryBlue hover:text-white rounded-full"
-              >
-                Start
-              </button>
-            </div>
-          </div>
-        </div>
-      )} */}
-      {startTest && (
-        <div
-          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-          aria-live="polite"
-        >
-          <div className="w-full max-w-sm p-5 bg-white rounded-lg shadow-lg transform transition-transform scale-100">
-            <h2
-              id="test-dialog-title"
-              className="mb-6 text-xl font-semibold text-center text-blue-900"
-            >
-              Ready to start your test?
-            </h2>
-            <p
-              id="test-dialog-description"
-              className="mb-6 text-base text-center text-gray-700"
-            >
-              Click "Start" to begin your test journey or "Cancel" to exit.
-            </p>
-            <div className="flex items-center justify-center space-x-4">
-              <button
-                onClick={() => setStartTest(false)}
-                className="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
-                aria-label="Cancel test"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleStartTest}
-                className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                aria-label="Start test"
-              >
-                Start
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Popup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)}>
+        <AssessmentStartDialog
+          handleStartTest={handleStartTest}
+          onClose={() => setIsPopupOpen(false)}
+        />
+      </Popup>
     </Layout>
   );
 };

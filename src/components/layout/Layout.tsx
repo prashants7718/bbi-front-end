@@ -7,16 +7,17 @@ import Cookies from "js-cookie";
 
 interface LayoutProps {
   children: ReactNode;
+  hideSidebar?: boolean;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const role: Roles = Roles.EMPLOYEE;
+const Layout: React.FC<LayoutProps> = ({ children,hideSidebar = false }) => {
+  const role: Roles = Roles.MANAGER;
 
   return (
     <div className="flex flex-col h-screen">
       <Header />
       <div className="flex flex-grow">
-        {Cookies.get('user') && JSON.parse(Cookies.get('user'))?.username && <div className="flex-shrink-0">
+        {!hideSidebar && Cookies.get('user') && JSON.parse(Cookies.get('user'))?.username && <div className="flex-shrink-0">
           <Sidebar role={role} />
         </div>}
         <div className="flex-1 overflow-y-auto p-4">

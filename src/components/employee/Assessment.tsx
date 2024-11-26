@@ -6,7 +6,7 @@ import { testData } from "./EmployeeDashboard";
 
 const OPTIONS = ["Positive", "Negative", "Neutral"];
 
-const TestComponent = () => {
+const Assessment = () => {
   const { testName } = useParams<{ testName: string }>();
   const navigate = useNavigate();
   const questions = Questionnaire[testName as keyof typeof Questionnaire] || [];
@@ -17,17 +17,15 @@ const TestComponent = () => {
   const [isAnswerSavedArray, setIsAnswerSavedArray] = useState<boolean[]>(
     new Array(questions.length).fill(false)
   );
-
   const timeRemainingString =
     testData.find((test) => test.name === testName)?.timeRemaining ?? "0 mins";
-
   const timeInSeconds = parseInt(timeRemainingString) * 60;
-
   const [timeLeft, setTimeLeft] = useState(timeInSeconds);
 
   useEffect(() => {
     if (timeLeft === 0) {
       alert("Time is Up!");
+      navigate("/dashboard");
       return;
     }
 
@@ -43,17 +41,13 @@ const TestComponent = () => {
       alert("Please select an answer before saving.");
       return;
     }
-
     const currentQuestion = questions[currentQuestionIndex];
-    console.log({ currentQuestion });
-
     if (
       (selectedAnswer === "Positive" && currentQuestion.value === "+") ||
       (selectedAnswer === "Negative" && currentQuestion.value === "-")
     ) {
       setScore((prevScore) => prevScore + 1);
     }
-
     setResponses({ ...responses, [currentQuestionIndex]: selectedAnswer });
     const updatedAnswerSavedArray = [...isAnswerSavedArray];
     updatedAnswerSavedArray[currentQuestionIndex] = true;
@@ -61,23 +55,14 @@ const TestComponent = () => {
   };
 
   const handleNext = () => {
-    if (!selectedAnswer) {
-      alert("Please save your answer before proceeding.");
-      return;
-    }
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
       setSelectedAnswer("");
     } else {
-      alert(`Test completed! Your final score is ${score}.`);
+      // alert(`Test completed! Your final score is ${score}.`);
       navigate("/available-tests");
     }
   };
-
-  useEffect(() => {
-    console.log("responses===", responses);
-    console.log("score===", score);
-  }, [score, responses]);
 
   if (!questions.length) {
     return (
@@ -98,7 +83,7 @@ const TestComponent = () => {
     return `${minutes}:${remainingSeconds}`;
   };
   return (
-    <Layout>
+    <Layout hideSidebar>
       <div className="flex justify-start bg-gray-100 shadow-lg rounded-md h-full/2 pt-4 pl-6 pr-6 pb-4">
         <div className="w-full m-8">
           <h2 className="text-2xl font-bold text-primaryBlue mb-4 text-left">
@@ -111,7 +96,7 @@ const TestComponent = () => {
             </p>
             <p>{formatTime(timeLeft)}</p>
           </div>
-          <p className="text-sm text-gray-600 text-start">
+          <p className="text-sm text-gray-600 text-start mb-1">
             {completedQuestions} Question{completedQuestions !== 1 ? "s" : ""}{" "}
             completed
           </p>
@@ -142,20 +127,29 @@ const TestComponent = () => {
           <div className="flex mt-4 space-x-3">
             <button
               onClick={handleSave}
-              className="px-4 py-2 bg-secondaryPink text-white rounded hover:bg-secondaryPink"
+              disabled={isAnswerSavedArray[currentQuestionIndex]}
+              className={`px-4 py-2 rounded font-bold ${
+                isAnswerSavedArray[currentQuestionIndex]
+                  ? "bg-green-400 text-white"
+                  : "bg-secondaryPink text-white hover:bg-secondaryPink"
+              }`}
             >
-              Save Answer
+              {isAnswerSavedArray[currentQuestionIndex]
+                ? "Saved"
+                : "Save Answer"}
             </button>
             <button
-              onClick={handleNext}
-              disabled={!isAnswerSavedArray[currentQuestionIndex]} 
-              className={`px-4 py-1 rounded-full ${
+              onClick={() => handleNext()}
+              disabled={!isAnswerSavedArray[currentQuestionIndex]}
+              className={`px-4 py-1 rounded font-bold ${
                 !isAnswerSavedArray[currentQuestionIndex]
                   ? "bg-gray-300 text-gray-700 cursor-not-allowed"
                   : "bg-primaryBlue text-white hover:bg-primaryBlue"
               }`}
             >
-              Next
+              {currentQuestionIndex === questions.length - 1
+                ? "Finish Test"
+                : "Next"}
             </button>
           </div>
         </div>
@@ -164,4 +158,4 @@ const TestComponent = () => {
   );
 };
 
-export default TestComponent;
+export default Assessment;

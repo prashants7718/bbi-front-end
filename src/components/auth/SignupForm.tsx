@@ -13,6 +13,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onClose }) => {
     username: "",
     password: "",
     confirmPassword: "",
+    companyName: "",
   });
   const [errors, setErrors] = useState({
     email: "",
@@ -48,6 +49,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onClose }) => {
       const userData = {
         username: formData.username,
         email: formData.email,
+        companyName:formData.companyName
       };
       Cookies.set("user", JSON.stringify(userData), { expires: 7 });
       navigate("/dashboard");
@@ -136,17 +138,29 @@ const SignupForm: React.FC<SignupFormProps> = ({ onClose }) => {
               </p>
             )}
           </div>
+          <div>
+            <input
+              type="text"
+              name="companyName"
+              value={formData.companyName.trim()}
+              onChange={handleChange}
+              placeholder={"Enter your company name"}
+              className={`w-full px-4 py-1 h-9 border text-sm ${
+                errors.username ? "border-red-500" : "border-gray-300"
+              } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            />
+          </div>
         </div>
-        <div className="flex justify-between gap-4 mt-4">
+        <div className="flex justify-between gap-4 mt-6 ">
           <button
             onClick={handleSubmit}
-            className="w-full py-3 text-white bg-secondaryPink rounded-lg hover:bg-pink-600 transition"
+            className="w-44 py-1 text-white bg-secondaryPink rounded-lg hover:bg-pink-600 transition"
           >
             Sign Up
           </button>
           <button
             onClick={onClose}
-            className="w-full py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+            className="w-44 py-1 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
           >
             Cancel
           </button>

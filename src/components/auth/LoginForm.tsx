@@ -70,16 +70,16 @@ const LoginForm: React.FC<LoginFormProps> = ({ onClose }) => {
           )}
         </div>
       </div>
-      <div className="flex justify-between mt-4">
+      <div className="flex justify-between gap-4 mt-6">
         <button
           onClick={handleSubmit}
-          className="w-[45%] py-3 text-white bg-secondaryPink rounded-lg hover:bg-pink-600 transition"
+          className="w-full py-1 text-white bg-secondaryPink rounded-lg hover:bg-pink-600 transition"
         >
           Login
         </button>
         <button
           onClick={onClose}
-          className="w-[45%] py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+          className="w-full py-1 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
         >
           Cancel
         </button>

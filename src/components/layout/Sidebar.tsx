@@ -1,5 +1,12 @@
+import {
+  faChartPie,
+  faCirclePlay,
+  faCircleStop,
+  faPeopleGroup,
+  faUserCircle,
+  faUsers
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChartPie, faCirclePlay, faCircleStop, faCogs, faList, faUserCircle, faUsers } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import { Roles } from "../../constant/enum";
 
@@ -11,19 +18,44 @@ interface MenuItem {
 
 const menuConfig: Record<Roles, MenuItem[]> = {
   employee: [
-    { label: "Dashboard", href: "/dashboard", icon: <FontAwesomeIcon icon={faChartPie} /> },
-    { label: "Available Test", href: "/available-tests", icon: <FontAwesomeIcon icon={faCirclePlay} /> },
-    { label: "Archive", href: "/archive", icon: <FontAwesomeIcon icon={faCircleStop} /> },
+    {
+      label: "Dashboard",
+      href: "/dashboard",
+      icon: <FontAwesomeIcon icon={faChartPie} />,
+    },
+    {
+      label: "Available Test",
+      href: "/available-tests",
+      icon: <FontAwesomeIcon icon={faCirclePlay} />,
+    },
+    {
+      label: "Archive",
+      href: "/archive",
+      icon: <FontAwesomeIcon icon={faCircleStop} />,
+    },
   ],
   manager: [
-    { label: "Dashboard", href: "/dashboard", icon: <FontAwesomeIcon icon={faChartPie} /> },
-    { label: "General Settings", href: "/settings", icon: <FontAwesomeIcon icon={faCogs} /> },
-    { label: "Teams", href: "/teams", icon: <FontAwesomeIcon icon={faUsers} /> },
-    { label: "User Management", href: "/user-management", icon: <FontAwesomeIcon icon={faUserCircle} /> },
-    { label: "Test Category", href: "/test-category", icon: <FontAwesomeIcon icon={faList} /> },
-    { label: "Questions", href: "/questions", icon: <FontAwesomeIcon icon={faList} /> },
-    { label: "Tests", href: "/tests", icon: <FontAwesomeIcon icon={faList} /> },
-    { label: "Test Results", href: "/test-results", icon: <FontAwesomeIcon icon={faList} /> },
+    {
+      label: "Dashboard",
+      href: "/dashboard",
+      icon: <FontAwesomeIcon icon={faChartPie} />,
+    },
+    
+    {
+      label: "Teams",
+      href: "/teams",
+      icon: <FontAwesomeIcon icon={faUsers} />,
+    },
+    {
+      label: "User Management",
+      href: "/user-management",
+      icon: <FontAwesomeIcon icon={faUserCircle} />,
+    },
+    {
+      label: "Team Matching",
+      href: "/team-matching",
+      icon: <FontAwesomeIcon icon={faPeopleGroup} />,
+    },
   ],
 };
 
@@ -37,8 +69,10 @@ const Sidebar: React.FC<{ role: Roles }> = ({ role }) => {
           <div key={item.href} className="p-1">
             <Link
               className={`px-4 py-2 bg-lightPink  rounded-md cursor-pointer flex  ${
-              location.pathname.includes(item.href) ? "bg-primaryBlue text-white font-semibold" : "text-primaryBlue"
-            }`}
+                location.pathname.includes(item.href)
+                  ? "bg-primaryBlue text-white font-semibold"
+                  : "text-primaryBlue"
+              }`}
               to={item.href}
             >
               <span>{item.icon}</span>
@@ -52,4 +86,3 @@ const Sidebar: React.FC<{ role: Roles }> = ({ role }) => {
 };
 
 export default Sidebar;
-
