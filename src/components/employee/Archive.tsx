@@ -1,20 +1,21 @@
 import Layout from "../layout/Layout";
-import { testData } from "./EmployeeDashboard";
+import Cookies from "js-cookie";
 
-const Archive = () => {
+const Archive = ({ testData }) => {
   const archivedTests = testData.filter((test) => test.status === "Completed");
+
+  const getScoreForTest = (testName) => {
+    const savedScore = Cookies.get(`${testName}-score`);
+    return savedScore ? parseInt(savedScore, 10) : 0;
+  };
   return (
     <Layout>
       <div className="flex h-screen">
-        {/* Main Content */}
         <div className="flex-1 p-6">
           <h2 className="text-3xl font-bold text-primaryBlue mb-6">
             Archived Tests
           </h2>
-
-          {/* Table and Pie Chart Section */}
           <div className="flex space-x-6">
-            {/* Table */}
             <div className="flex-1 bg-white p-4 shadow rounded-lg">
               <h3 className="text-xl font-bold text-primaryBlue mb-4">
                 Test Overview
@@ -24,6 +25,7 @@ const Archive = () => {
                   <tr className="text-primaryBlue">
                     <th className="border-b py-2">Test Name</th>
                     <th className="border-b py-2">Status</th>
+                    <th className="border-b py-2">Score</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -44,17 +46,9 @@ const Archive = () => {
                       >
                         {test.status}
                       </td>
-                      {/* <td className="border-b py-2">
-                      {test.status !== "Completed" && (
-                        <FontAwesomeIcon
-                          icon={faPlayCircle}
-                          onClick={() => handleStartClick(test)}
-                          className="cursor-pointer text-blue-500 hover:text-blue-600"
-                          title="Start or Continue Test"
-                          size="lg"
-                        />
-                      )}
-                    </td> */}
+                      <td className="border-b py-2">
+                        {getScoreForTest(test.name)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

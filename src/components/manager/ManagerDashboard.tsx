@@ -13,16 +13,22 @@ const ManagerDashboard = () => {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="text-primaryBlue">
+                    <th className="border-b p-3"></th>
                     <th className="border-b p-3">Name</th>
                     <th className="border-b p-3">Test Status</th>
                     <th className="border-b p-3">Role</th>
                     <th className="border-b p-3">Job Title</th>
-                    <th className="border-b p-3"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {Employees.map((employee) => (
                     <tr key={employee.Name} className="hover:bg-gray-50">
+                      <td className="border-b p-3">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                        />
+                      </td>
                       <td className="border-b p-3">{employee.Name}</td>
                       <td
                         className={`border-b p-3 ${
@@ -37,12 +43,6 @@ const ManagerDashboard = () => {
                       </td>
                       <td className="border-b p-3">{employee.Role}</td>
                       <td className="border-b p-3">{employee.JobTitle}</td>
-                      <td className="border-b p-3">
-                        <input
-                          type="checkbox"
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-                        />
-                      </td>
                     </tr>
                   ))}
                 </tbody>

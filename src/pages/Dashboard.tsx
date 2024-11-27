@@ -3,10 +3,14 @@ import EmployeeDashboard from "../components/employee/EmployeeDashboard";
 import ManagerDashboard from "../components/manager/ManagerDashboard";
 import { Roles } from "../constant/enum";
 
-const Dashboard: React.FC<{role:Roles}> = ({ role }) => {
+const Dashboard: React.FC<{ role: Roles; testData }> = ({ role, testData }) => {
   return (
     <div>
-      {role === Roles.EMPLOYEE ? <EmployeeDashboard /> : <ManagerDashboard />}
+      {role === Roles.EMPLOYEE ? (
+        <EmployeeDashboard testData={testData} />
+      ) : (
+        <ManagerDashboard />
+      )}
     </div>
   );
 };

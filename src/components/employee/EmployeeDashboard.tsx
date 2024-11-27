@@ -6,19 +6,9 @@ import { useNavigate } from "react-router-dom";
 import AssessmentStartDialog from "../../pages/AssessmentStartDialog";
 import Layout from "../layout/Layout";
 import Popup from "../layout/Popup";
-export const testData = [
-  { id: 1, name: "ADHD", status: "Not Started", timeRemaining: "5 mins" },
-  { id: 2, name: "Autism", status: "Not Started", timeRemaining: "15 mins" },
-  { id: 3, name: "Dyslexia", status: "Completed", timeRemaining: "4 mins" },
-  {
-    id: 4,
-    name: "Dyscalculia",
-    status: "In Progress",
-    timeRemaining: "5 mins",
-  },
-];
+import { TestItem } from "../../App";
 
-const EmployeeDashboard = () => {
+const EmployeeDashboard = ({ testData }) => {
   const navigate = useNavigate();
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   // const statusCounts = {
@@ -85,7 +75,7 @@ const EmployeeDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {testData.map((test) => (
+                  {testData.map((test: TestItem) => (
                     <tr
                       key={test.id}
                       className="text-gray-700 hover:bg-grayBackground"
@@ -108,7 +98,7 @@ const EmployeeDashboard = () => {
                           <FontAwesomeIcon
                             icon={faPlayCircle}
                             onClick={() => handleStartClick(test.name)}
-                            className="cursor-pointer text-blue-500 hover:text-blue-600"
+                            className="cursor-pointer text-primaryBlue hover:text-primaryBlue"
                             title="Start or Continue Test"
                             size="lg"
                           />

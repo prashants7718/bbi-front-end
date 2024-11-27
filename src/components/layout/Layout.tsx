@@ -11,7 +11,7 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children,hideSidebar = false }) => {
-  const role: Roles = Roles.MANAGER;
+  const role: Roles = Roles.EMPLOYEE;
 
   return (
     <div className="flex flex-col h-screen">

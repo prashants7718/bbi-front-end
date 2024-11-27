@@ -11,7 +11,7 @@ export const Employees = [
     TestStatus: "In Progress",
     Role: "Prospect",
     JobTitle: "Marketing Specialist",
-    Team: 'ABC'
+    Team: 'HT'
   },
   {
     Name: "Alice Johnson",

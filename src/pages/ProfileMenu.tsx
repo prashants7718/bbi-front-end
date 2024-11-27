@@ -13,7 +13,6 @@ const ProfileMenu = () => {
     Cookies.remove("user");
     navigate("/");
   };
-
   const handleSettings = () => {
     navigate("/settings");
   };

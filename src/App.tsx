@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import React from "react";
+import React, { useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import "./App.css";
 import Archive from "./components/employee/Archive";
@@ -12,7 +12,6 @@ import Dashboard from "./pages/Dashboard";
 import Home from "./pages/Home";
 import UserManagement from "./components/manager/UserManagement";
 import Teams from "./components/manager/Teams";
-import InvitationDialog from "./pages/InvitationDialog";
 
 export const isAuthenticated = (): boolean => {
   try {
@@ -31,12 +30,28 @@ export const isAuthenticated = (): boolean => {
 interface PrivateRouteProps {
   children: React.ReactNode;
 }
-
+export type TestItem = {
+  id: number;
+  name: string;
+  status: "Not Started" | "In Progress" | "Completed"; // Use a union type for the status
+  timeRemaining: string; // Representing as a string since it's formatted
+};
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   return isAuthenticated() ? <>{children}</> : <Navigate to="/" />;
 };
 
 const App: React.FC = () => {
+  const [testData, setTestData] = useState<TestItem[]>([
+    { id: 1, name: "ADHD", status: "Not Started", timeRemaining: "5 mins" },
+    { id: 2, name: "Autism", status: "Not Started", timeRemaining: "10 mins" },
+    { id: 3, name: "Dyslexia", status: "Not Started", timeRemaining: "5 mins" },
+    {
+      id: 4,
+      name: "Dyscalculia",
+      status: "In Progress",
+      timeRemaining: "5 mins",
+    },
+  ]);
   return (
     <div className="min-h-screen">
       <Routes>
@@ -48,18 +63,39 @@ const App: React.FC = () => {
           path="/dashboard"
           element={
             <PrivateRoute>
-              <Dashboard role={Roles.MANAGER} />
+              <Dashboard role={Roles.EMPLOYEE} testData={testData} />
             </PrivateRoute>
           }
         />
-        <Route path="/available-tests" element={<AvailableTest />} />
-        <Route path="/archive" element={<Archive />} />
-        <Route path="/test/:testName" element={<Assessment />} />
+        <Route
+          path="/available-tests"
+          element={
+            <PrivateRoute>
+              <AvailableTest testData={testData} setTestData={setTestData} />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/archive"
+          element={
+            <PrivateRoute>
+              <Archive testData={testData} />{" "}
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/test/:testName"
+          element={
+            <PrivateRoute>
+              <Assessment testData={testData} setTestData={setTestData} />
+            </PrivateRoute>
+          }
+        />
         <Route path="/team-matching" element={<TeamMatching />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/user-management" element={<UserManagement />} />
         <Route path="/teams" element={<Teams />} />
-       </Routes>
+      </Routes>
     </div>
   );
 };

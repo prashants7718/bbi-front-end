@@ -24,7 +24,7 @@ const TeamMatching = () => {
         <h2 className="text-3xl font-bold text-primaryBlue mb-6">
           Team Matching
         </h2>
-        <div className="flex  bg-white p-4 shadow rounded-lg justify-around">
+        {/* <div className="flex  bg-white p-4 shadow rounded-lg justify-around">
           <div className="mb-6 w-56">
             <label className="block text-sm font-semibold mb-2">
               Select number of team members:
@@ -59,7 +59,7 @@ const TeamMatching = () => {
               </select>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </Layout>
   );

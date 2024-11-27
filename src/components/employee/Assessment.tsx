@@ -2,39 +2,60 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "../layout/Layout";
 import { Questionnaire } from "../../constant/questions";
-import { testData } from "./EmployeeDashboard";
+import Cookies from "js-cookie";
 
 const OPTIONS = ["Positive", "Negative", "Neutral"];
 
-const Assessment = () => {
+const Assessment = ({ testData, setTestData }) => {
   const { testName } = useParams<{ testName: string }>();
   const navigate = useNavigate();
   const questions = Questionnaire[testName as keyof typeof Questionnaire] || [];
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [responses, setResponses] = useState<{ [key: number]: string }>({});
   const [selectedAnswer, setSelectedAnswer] = useState<string>("");
-  const [score, setScore] = useState<number>(0);
+
   const [isAnswerSavedArray, setIsAnswerSavedArray] = useState<boolean[]>(
     new Array(questions.length).fill(false)
   );
+  const [score, setScore] = useState<number>(() => {
+    const savedScore = Cookies.get(`${testName}-score`);
+    return savedScore ? parseInt(savedScore) : 0;
+  });
+
   const timeRemainingString =
     testData.find((test) => test.name === testName)?.timeRemaining ?? "0 mins";
   const timeInSeconds = parseInt(timeRemainingString) * 60;
   const [timeLeft, setTimeLeft] = useState(timeInSeconds);
+  const [isTimeUp, setIsTimeUp] = useState(false);
 
   useEffect(() => {
     if (timeLeft === 0) {
-      alert("Time is Up!");
-      navigate("/dashboard");
+      setIsTimeUp(true);
       return;
     }
-
+    console.log("timeLeft========>>",timeLeft)
     const timerId = setInterval(() => {
       setTimeLeft((prevTime) => prevTime - 1);
     }, 1000);
-
     return () => clearInterval(timerId);
   }, [timeLeft]);
+
+
+  useEffect(() => {
+    const savedScore = Cookies.get(`${testName}-score`);
+    if (!savedScore) {
+      setScore(0);
+      Cookies.set(`${testName}-score`, "0");
+    }
+  }, [testName]);
+
+  useEffect(() => {
+    Cookies.set(`${testName}-score`, score.toString());
+  }, [score, testName]);
+  const handleTimeUpDialogClose = () => {
+    setIsTimeUp(false);
+    navigate("/dashboard");
+  };
 
   const handleSave = () => {
     if (!selectedAnswer) {
@@ -54,13 +75,24 @@ const Assessment = () => {
     setIsAnswerSavedArray(updatedAnswerSavedArray);
   };
 
+  const handleAnswerChange = (newAnswer: string) => {
+    setSelectedAnswer(newAnswer);
+
+    const updatedAnswerSavedArray = [...isAnswerSavedArray];
+    updatedAnswerSavedArray[currentQuestionIndex] = false;
+    setIsAnswerSavedArray(updatedAnswerSavedArray);
+  };
   const handleNext = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
       setSelectedAnswer("");
     } else {
-      // alert(`Test completed! Your final score is ${score}.`);
-      navigate("/available-tests");
+      setTestData((prevTestData: any[]) =>
+        prevTestData.map((test) =>
+          test.name === testName ? { ...test, status: "Completed" } : test
+        )
+      );
+      navigate("/dashboard");
     }
   };
 
@@ -84,7 +116,7 @@ const Assessment = () => {
   };
   return (
     <Layout hideSidebar>
-      <div className="flex justify-start bg-gray-100 shadow-lg rounded-md h-full/2 pt-4 pl-6 pr-6 pb-4">
+      <div className="flex justify-start bg-white shadow-lg rounded-md h-full/2 pt-4 pl-6 pr-6 pb-4">
         <div className="w-full m-8">
           <h2 className="text-2xl font-bold text-primaryBlue mb-4 text-left">
             {testName} Test
@@ -117,7 +149,7 @@ const Assessment = () => {
                   name="answer"
                   value={option}
                   checked={selectedAnswer === option}
-                  onChange={(e) => setSelectedAnswer(e.target.value)}
+                  onChange={(e) => handleAnswerChange(e.target.value)}
                   className="form-radio text-red-800"
                 />
                 <span className="text-gray-700">{option}</span>
@@ -127,21 +159,21 @@ const Assessment = () => {
           <div className="flex mt-4 space-x-3">
             <button
               onClick={handleSave}
-              disabled={isAnswerSavedArray[currentQuestionIndex]}
-              className={`px-4 py-2 rounded font-bold ${
-                isAnswerSavedArray[currentQuestionIndex]
-                  ? "bg-green-400 text-white"
-                  : "bg-secondaryPink text-white hover:bg-secondaryPink"
+              disabled={
+                !selectedAnswer || isAnswerSavedArray[currentQuestionIndex]
+              }
+              className={`px-4 py-2 rounded ${
+                !selectedAnswer || isAnswerSavedArray[currentQuestionIndex]
+                  ? "bg-gray-300 text-gray-700 cursor-not-allowed"
+                  : "bg-primaryBlue text-white hover:bg-primaryBlue"
               }`}
             >
-              {isAnswerSavedArray[currentQuestionIndex]
-                ? "Saved"
-                : "Save Answer"}
+              Save Answer
             </button>
             <button
               onClick={() => handleNext()}
               disabled={!isAnswerSavedArray[currentQuestionIndex]}
-              className={`px-4 py-1 rounded font-bold ${
+              className={`px-4 py-1 rounded ${
                 !isAnswerSavedArray[currentQuestionIndex]
                   ? "bg-gray-300 text-gray-700 cursor-not-allowed"
                   : "bg-primaryBlue text-white hover:bg-primaryBlue"
@@ -154,6 +186,22 @@ const Assessment = () => {
           </div>
         </div>
       </div>
+      {isTimeUp && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+          <div className="bg-white p-6 rounded shadow-md">
+            <h2 className="text-2xl text-center font-bold mb-4">Time is Up!</h2>
+            <p className="mb-4">You have run out of time.</p>
+            <div className="flex justify-center">
+              <button
+                onClick={handleTimeUpDialogClose}
+                className="px-4 py-1 bg-primaryBlue text-white rounded hover:bg-primaryBlue-dark"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 };

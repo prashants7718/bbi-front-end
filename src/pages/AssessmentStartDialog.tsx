@@ -33,7 +33,7 @@ const AssessmentStartDialog = ({ handleStartTest, onClose }: TestDialogProps) =>
       >
         <h2
           id="test-dialog-title"
-          className="mb-3 text-xl font-semibold text-center text-blue-900"
+          className="mb-3 text-xl font-semibold text-center text-primaryBlue"
         >
           Ready to start your test?
         </h2>
