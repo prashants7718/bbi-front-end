@@ -1,14 +1,14 @@
 import {
+  faCircleChevronLeft,
+  faCircleChevronRight,
   faEnvelope,
-  faGreaterThan,
-  faLessThan,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Layout from "../layout/Layout";
 import { useState } from "react";
-import Popup from "../layout/Popup";
-import InvitationDialog from "../../pages/InvitationDialog";
 import { Employees } from "../../constant/employees";
+import InvitationDialog from "../../pages/InvitationDialog";
+import Layout from "../layout/Layout";
+import Popup from "../layout/Popup";
 
 const UserManagement = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -19,7 +19,7 @@ const UserManagement = () => {
 
   const [selectedTeam, setSelectedTeam] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // Adjust as needed
+  const itemsPerPage = 10;
 
   const uniqueTeams = ["All", ...new Set(Employees.map((emp) => emp.Team))];
   const filteredEmployees =
@@ -44,15 +44,17 @@ const UserManagement = () => {
         <h2 className="text-3xl font-bold text-primaryBlue mb-6">
           User Management
         </h2>
-        {/* <div className="items-center justify-between bg-white p-4 shadow rounded-lg">
-          <button
-            className="flex items-center ml-auto bg-primaryBlue text-white p-2 rounded-xl mr-3"
-            onClick={() => setIsPopupOpen(true)}
-          >
-            <FontAwesomeIcon icon={faEnvelope} className="mr-2" />
-            Invite
-          </button>
-          <div className="p-6">
+        <div className="items-center justify-between bg-white p-6 shadow rounded-lg">
+          {/* <div className="flex justify-end">
+            <button
+              className="mb-1 p-1 px-5 bg-primaryBlue text-white rounded shadow hover:bg-primaryBlue"
+              onClick={() => setIsPopupOpen(true)}
+            >
+              <FontAwesomeIcon icon={faEnvelope} className="mr-2" />
+              Invite
+            </button>
+          </div> */}
+          <div className="p-1">
             <div className="mb-1 flex justify-start items-center">
               <label className="text-base font-medium text-gray-70 ml-2">
                 Filter by Team:
@@ -100,25 +102,25 @@ const UserManagement = () => {
                 ))}
               </tbody>
             </table>
-            <div className="mt-4 flex justify-end space-x-2">
+            {/* <div className="mt-4 flex justify-end space-x-2 ">
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
               >
-                <FontAwesomeIcon icon={faLessThan} size="2xs" />
+                <FontAwesomeIcon icon={faCircleChevronLeft} />
               </button>
               <span className="flex items-center justify-center">
-                Page {currentPage} of {totalPages}
+                {currentPage} of {totalPages}
               </span>
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
               >
-                <FontAwesomeIcon icon={faGreaterThan} size="2xs" />
+                <FontAwesomeIcon icon={faCircleChevronRight} />
               </button>
-            </div>
+            </div> */}
           </div>
-        </div> */}
+        </div>
       </div>
       <Popup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)}>
         <InvitationDialog

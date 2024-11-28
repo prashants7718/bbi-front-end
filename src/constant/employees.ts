@@ -4,41 +4,41 @@ export const Employees = [
     TestStatus: "Completed",
     Role: "Employee",
     JobTitle: "Software Engineer",
-    Team: 'ABC'
+    Team: "ABC",
   },
   {
     Name: "Jane Smith",
     TestStatus: "In Progress",
     Role: "Prospect",
     JobTitle: "Marketing Specialist",
-    Team: 'HT'
+    Team: "HT",
   },
   {
     Name: "Alice Johnson",
     TestStatus: "Completed",
     Role: "Employee",
     JobTitle: "Project Manager",
-    Team: 'XYZ'
+    Team: "XYZ",
   },
   {
     Name: "Robert Brown",
     TestStatus: "Not Completed",
     Role: "Prospect",
     JobTitle: "Sales Associate",
-    Team: 'XYZ'
+    Team: "XYZ",
   },
   {
     Name: "Emily Davis",
     TestStatus: "Completed",
     Role: "Employee",
     JobTitle: "HR Coordinator",
-    Team: 'ABC'
+    Team: "ABC",
   },
   {
     Name: "Michael Wilson",
     TestStatus: "Not Completed",
     Role: "Prospect",
     JobTitle: "Data Analyst",
-    Team: 'ABC'
+    Team: "ABC",
   },
 ];

@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import Home from "./pages/Home";
 import UserManagement from "./components/manager/UserManagement";
 import Teams from "./components/manager/Teams";
+import TeamMembers from "./components/manager/TeamMembers";
 
 export const isAuthenticated = (): boolean => {
   try {
@@ -63,7 +64,7 @@ const App: React.FC = () => {
           path="/dashboard"
           element={
             <PrivateRoute>
-              <Dashboard role={Roles.EMPLOYEE} testData={testData} />
+              <Dashboard role={Roles.MANAGER} testData={testData} />
             </PrivateRoute>
           }
         />
@@ -95,6 +96,7 @@ const App: React.FC = () => {
         <Route path="/settings" element={<Settings />} />
         <Route path="/user-management" element={<UserManagement />} />
         <Route path="/teams" element={<Teams />} />
+        <Route path="/team/:teamName" element={<TeamMembers />} />
       </Routes>
     </div>
   );
