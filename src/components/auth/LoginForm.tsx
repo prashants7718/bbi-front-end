@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
+import { login } from "../../service/authService";
 
 interface LoginFormProps {
   onClose: () => void;
@@ -27,16 +28,27 @@ const LoginForm: React.FC<LoginFormProps> = ({ onClose }) => {
 
   const handleSubmit = () => {
     if (validate()) {
-      const userData = {
-        username: formData.username,
-      };
-      Cookies.set("user", JSON.stringify(userData), { expires: 7 });
+      // const userData = {
+      //   username: formData.username,
+      // };
+      // Cookies.set("user", JSON.stringify(userData), { expires: 7 });
+      handleLogin();
       navigate("/dashboard");
       // alert("Logged in successfully!");
       onClose();
     }
   };
-
+  const handleLogin = async () => {
+    console.log("in Login handler");
+    try {
+      const { token } = await login(formData.username, formData.password);
+      sessionStorage.setItem("accessToken", token);
+      // window.location.href = "/dashboard";
+      navigate("/dashboard");
+    } catch (err: any) {
+      console.log("error", err);
+    }
+  };
   return (
     <div className="px-4 bg-white rounded-lg">
       <h2 className="text-3xl font-bold mb-6 text-center text-primaryBlue">
