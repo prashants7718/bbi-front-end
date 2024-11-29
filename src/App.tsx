@@ -13,18 +13,38 @@ import Home from "./pages/Home";
 import UserManagement from "./components/manager/UserManagement";
 import Teams from "./components/manager/Teams";
 import TeamMembers from "./components/manager/TeamMembers";
+import InviteSignup from "./pages/InviteSignup";
+import { getUserRoleFromToken } from "./config/getUserRole";
+import { jwtDecode } from "jwt-decode";
+
+// export const isAuthenticated = (): boolean => {
+//   try {
+//     const userCookie = Cookies.get("user");
+//     if (userCookie) {
+//       const username = JSON.parse(userCookie)?.username;
+//       return !!username; // Returns true if username exists, otherwise false
+//     }
+//   } catch (error) {
+//     console.error("Failed to parse cookie data:", error);
+//   }
+//   return false;
+// };
 
 export const isAuthenticated = (): boolean => {
   try {
-    const userCookie = Cookies.get("user");
-    if (userCookie) {
-      const username = JSON.parse(userCookie)?.username;
-      return !!username; // Returns true if username exists, otherwise false
+    const accessToken = window.sessionStorage.getItem("accessToken");
+    if (accessToken) {
+      const decodedToken = jwtDecode<{ exp: number }>(accessToken);
+
+      const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+      if (decodedToken.exp > currentTime) {
+        return true; // Token is valid and not expired
+      }
     }
   } catch (error) {
-    console.error("Failed to parse cookie data:", error);
+    console.error("Error decoding the token", error);
   }
-  return false;
+  return false; // Token doesn't exist or is invalid/expired
 };
 
 // PrivateRoute Component
@@ -53,6 +73,8 @@ const App: React.FC = () => {
       timeRemaining: "5 mins",
     },
   ]);
+  const userRole = getUserRoleFromToken();
+
   return (
     <div className="min-h-screen">
       <Routes>
@@ -64,7 +86,7 @@ const App: React.FC = () => {
           path="/dashboard"
           element={
             <PrivateRoute>
-              <Dashboard role={Roles.MANAGER} testData={testData} />
+              <Dashboard role={userRole} testData={testData} />
             </PrivateRoute>
           }
         />
@@ -92,11 +114,11 @@ const App: React.FC = () => {
             </PrivateRoute>
           }
         />
-        <Route path="/team-matching" element={<TeamMatching />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/user-management" element={<UserManagement />} />
         <Route path="/teams" element={<Teams />} />
         <Route path="/team/:teamName" element={<TeamMembers />} />
+        <Route path="/join/:code" element={<InviteSignup />} />
       </Routes>
     </div>
   );

@@ -2,8 +2,7 @@ import axios, { CreateAxiosDefaults } from "axios";
 
 export const getAxiosInstance = () => {
   const defaultOptions: CreateAxiosDefaults = {
-    // baseURL: import.meta.env.REACT_APP_API_ENDPOINT,
-    baseURL: "http://localhost:3000",
+    baseURL: process.env.VITE_API_ENDPOINT,
   };
   const axiosInstance = axios.create(defaultOptions);
   axiosInstance.interceptors.request.use(async (request) => {
@@ -19,7 +18,7 @@ export const getAxiosInstance = () => {
     (error) => {
       if (error.response?.status === 401) {
         console.error("Unauthorized access - token expired");
-        window.location.href = "/login";
+        window.location.href = "/";
       }
       return Promise.reject(error);
     }

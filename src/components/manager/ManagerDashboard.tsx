@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Employees } from "../../constant/employees";
 import Layout from "../layout/Layout";
+import TeamMatching from "./TeamMatching";
 
 const ManagerDashboard = () => {
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<string>("");
+  const [newTeamName, setNewTeamName] = useState("");
   const isTableView = Employees.every((emp) => emp.TestStatus === "Completed");
   const Teams = [...new Set(Employees.map((emp) => emp.Team))];
   const handleSelect = (employeeName: string): void => {
@@ -21,6 +23,8 @@ const ManagerDashboard = () => {
 
   const closeModal = (): void => {
     setIsModalOpen(false);
+    setSelectedTeam(""); // Reset the selected team
+    setNewTeamName("");
   };
 
   const handleAssignToTeam = (): void => {
@@ -34,22 +38,45 @@ const ManagerDashboard = () => {
       alert("Please select a team!");
     }
   };
+
+  const handleCreateAndAssignToTeam = () => {
+    if (!newTeamName) return;
+
+    // Logic to create a new team
+    console.log(`Creating new team: ${newTeamName}`);
+
+    // Simulate adding the new team to the list of teams
+    const updatedTeams = [...Teams, newTeamName];
+    // setTeams(updatedTeams);
+
+    // Assign selected employees to the newly created team
+    console.log(`Assigning employees to new team: ${newTeamName}`);
+
+    // Reset the new team name input and close the modal
+    setNewTeamName("");
+    closeModal();
+  };
+
   return (
     <Layout>
       <div className="flex-1 p-6">
-        <h2 className="text-3xl font-bold text-primaryBlue mb-6">Dashboard</h2>
+        <div className="flex justify-between items-center">
+          <h2 className="text-3xl font-bold text-primaryBlue mb-6">
+            Dashboard
+          </h2>
+          <div className="flex py-1 mt-4">
+            {selectedEmployees.length > 0 && (
+              <button
+                onClick={openModal}
+                className="p-1 bg-primaryBlue text-white rounded shadow hover:bg-primaryBlue"
+              >
+                Assign to Team
+              </button>
+            )}
+          </div>
+        </div>
         {!isTableView ? (
           <div className="flex space-x-6 flex-col">
-              <div className="flex justify-end">
-                {selectedEmployees.length > 0 && (
-                  <button
-                    onClick={openModal}
-                    className="px-4 mb-2 py-1 bg-primaryBlue text-white rounded shadow hover:bg-primaryBlue"
-                  >
-                    Assign to Team
-                  </button>
-                )}
-              </div>
             <div className="flex-1 bg-white p-6 shadow rounded-lg">
               <table className="w-full text-left border-collapse">
                 <thead>
@@ -98,7 +125,7 @@ const ManagerDashboard = () => {
           </div>
         )}
         {isModalOpen && (
-          <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 ">
+          <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
             <div className="bg-white w-1/4 rounded-lg p-6 shadow-lg">
               <h3 className="text-xl font-bold mb-4 text-primaryBlue">
                 Assign to a Team
@@ -106,7 +133,7 @@ const ManagerDashboard = () => {
               <select
                 value={selectedTeam}
                 onChange={(e) => setSelectedTeam(e.target.value)}
-                className="border p-2 rounded w-full mb-4 bg-white text-sm"
+                className="border border-gray-300 px-4 py-1 rounded w-full mb-4 bg-white text-sm"
               >
                 <option value="" disabled>
                   Select a team
@@ -116,7 +143,20 @@ const ManagerDashboard = () => {
                     {team}
                   </option>
                 ))}
+                <option value="create-new">Create New Team</option>
               </select>
+
+              {selectedTeam === "create-new" && (
+                <div className="mt-1">
+                  <input
+                    id="newTeamName"
+                    value={newTeamName}
+                    onChange={(e) => setNewTeamName(e.target.value)}
+                    placeholder="Enter team name"
+                    className="w-full px-4 py-1 border border-gray-300 rounded mb-4 bg-white text-sm"
+                  />
+                </div>
+              )}
               <div className="flex justify-end space-x-4">
                 <button
                   onClick={closeModal}
@@ -125,20 +165,30 @@ const ManagerDashboard = () => {
                   Cancel
                 </button>
                 <button
-                  onClick={handleAssignToTeam}
-                  disabled={!selectedTeam}
+                  onClick={
+                    selectedTeam === "create-new"
+                      ? handleCreateAndAssignToTeam
+                      : handleAssignToTeam
+                  }
+                  disabled={
+                    selectedTeam === "create-new" ? !newTeamName : !selectedTeam
+                  }
                   className={`px-4 py-1 rounded ${
-                    selectedTeam
+                    selectedTeam &&
+                    (selectedTeam !== "create-new" || newTeamName)
                       ? "bg-primaryBlue text-white hover:bg-primaryBlue"
                       : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   }`}
                 >
-                  Assign
+                  {selectedTeam === "create-new" ? "Create & Assign" : "Assign"}
                 </button>
               </div>
             </div>
           </div>
         )}
+        <div className="mt-8">
+          <TeamMatching />
+        </div>
       </div>
     </Layout>
   );

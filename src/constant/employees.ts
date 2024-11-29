@@ -5,6 +5,7 @@ export const Employees = [
     Role: "Employee",
     JobTitle: "Software Engineer",
     Team: "ABC",
+    scores:[4,5,3,2]
   },
   {
     Name: "Jane Smith",
@@ -12,6 +13,7 @@ export const Employees = [
     Role: "Prospect",
     JobTitle: "Marketing Specialist",
     Team: "HT",
+    scores:[4,5,3,2]
   },
   {
     Name: "Alice Johnson",
@@ -19,6 +21,7 @@ export const Employees = [
     Role: "Employee",
     JobTitle: "Project Manager",
     Team: "XYZ",
+    scores:[7,6,5,3]
   },
   {
     Name: "Robert Brown",
@@ -26,6 +29,7 @@ export const Employees = [
     Role: "Prospect",
     JobTitle: "Sales Associate",
     Team: "XYZ",
+    scores:[7,3,7,4]
   },
   {
     Name: "Emily Davis",
@@ -33,6 +37,7 @@ export const Employees = [
     Role: "Employee",
     JobTitle: "HR Coordinator",
     Team: "ABC",
+    scores:[3,6,7,3]
   },
   {
     Name: "Michael Wilson",
@@ -40,5 +45,6 @@ export const Employees = [
     Role: "Prospect",
     JobTitle: "Data Analyst",
     Team: "ABC",
+    scores:[2,7,7,2]
   },
 ];

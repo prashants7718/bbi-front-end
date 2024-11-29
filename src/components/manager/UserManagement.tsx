@@ -22,10 +22,16 @@ const UserManagement = () => {
   const itemsPerPage = 10;
 
   const uniqueTeams = ["All", ...new Set(Employees.map((emp) => emp.Team))];
+
+  const sortedEmployees = Employees.slice().sort((a, b) =>
+    a.Name.localeCompare(b.Name)
+  );
   const filteredEmployees =
     selectedTeam === "All"
-      ? Employees
-      : Employees.filter((emp) => emp.Team === selectedTeam);
+      ? sortedEmployees
+      : sortedEmployees
+          .filter((emp) => emp.Team === selectedTeam)
+          .concat(sortedEmployees.filter((emp) => emp.Team !== selectedTeam));
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -41,11 +47,11 @@ const UserManagement = () => {
   return (
     <Layout>
       <div className="p-6">
-        <h2 className="text-3xl font-bold text-primaryBlue mb-6">
-          User Management
-        </h2>
-        <div className="items-center justify-between bg-white p-6 shadow rounded-lg">
-          {/* <div className="flex justify-end">
+        <div>
+          <h2 className="text-3xl font-bold text-primaryBlue">
+            User Management
+          </h2>
+          <div className="flex justify-end p-1">
             <button
               className="mb-1 p-1 px-5 bg-primaryBlue text-white rounded shadow hover:bg-primaryBlue"
               onClick={() => setIsPopupOpen(true)}
@@ -53,7 +59,9 @@ const UserManagement = () => {
               <FontAwesomeIcon icon={faEnvelope} className="mr-2" />
               Invite
             </button>
-          </div> */}
+          </div>
+        </div>
+        <div className="items-center justify-between bg-white p-6 shadow rounded-lg">
           <div className="p-1">
             <div className="mb-1 flex justify-start items-center">
               <label className="text-base font-medium text-gray-70 ml-2">

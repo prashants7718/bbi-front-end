@@ -1,19 +1,20 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 
 interface SignupFormProps {
-  onClose: () => void;
+  onClose?: () => void;
+  invitationData?: { email: string; company: string; team: string };
 }
 
-const SignupForm: React.FC<SignupFormProps> = ({ onClose }) => {
+const SignupForm: React.FC<SignupFormProps> = ({ onClose,invitationData }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: "",
+    email: invitationData?.email || "",
     username: "",
     password: "",
     confirmPassword: "",
-    companyName: "",
+    companyName: invitationData?.company || "",
   });
   const [errors, setErrors] = useState({
     email: "",
@@ -21,7 +22,15 @@ const SignupForm: React.FC<SignupFormProps> = ({ onClose }) => {
     password: "",
     confirmPassword: "",
   });
-
+  useEffect(() => {
+    if (invitationData) {
+      setFormData((prev) => ({
+        ...prev,
+        email: invitationData.email,
+        companyName: invitationData.company,
+      }));
+    }
+  }, [invitationData]);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));

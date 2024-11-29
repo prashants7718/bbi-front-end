@@ -4,7 +4,7 @@ import {
   faCircleStop,
   faPeopleGroup,
   faUserCircle,
-  faUsers
+  faUsers,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
@@ -16,8 +16,8 @@ interface MenuItem {
   icon: JSX.Element;
 }
 
-const menuConfig: Record<Roles, MenuItem[]> = {
-  employee: [
+const menuConfig: Record<string, MenuItem[]> = {
+  Employee: [
     {
       label: "Dashboard",
       href: "/dashboard",
@@ -34,13 +34,13 @@ const menuConfig: Record<Roles, MenuItem[]> = {
       icon: <FontAwesomeIcon icon={faCircleStop} />,
     },
   ],
-  manager: [
+  Manager: [
     {
       label: "Dashboard",
       href: "/dashboard",
       icon: <FontAwesomeIcon icon={faChartPie} />,
     },
-    
+
     {
       label: "Teams",
       href: "/teams",
@@ -51,15 +51,10 @@ const menuConfig: Record<Roles, MenuItem[]> = {
       href: "/user-management",
       icon: <FontAwesomeIcon icon={faUserCircle} />,
     },
-    {
-      label: "Team Matching",
-      href: "/team-matching",
-      icon: <FontAwesomeIcon icon={faPeopleGroup} />,
-    },
   ],
 };
 
-const Sidebar: React.FC<{ role: Roles }> = ({ role }) => {
+const Sidebar: React.FC<{ role: string }> = ({ role }) => {
   const menuItems = menuConfig[role] || [];
 
   return (

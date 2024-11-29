@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import { login } from "../../service/authService";
+import { getUserRoleFromToken } from "../../config/getUserRole";
 
 interface LoginFormProps {
   onClose: () => void;
@@ -28,9 +29,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onClose }) => {
 
   const handleSubmit = () => {
     if (validate()) {
-      // const userData = {
-      //   username: formData.username,
-      // };
+      const userData = {
+        username: formData.username,
+      };
       // Cookies.set("user", JSON.stringify(userData), { expires: 7 });
       handleLogin();
       navigate("/dashboard");
@@ -44,6 +45,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onClose }) => {
       const { token } = await login(formData.username, formData.password);
       sessionStorage.setItem("accessToken", token);
       // window.location.href = "/dashboard";
+      const userRole = getUserRoleFromToken();
+      console.log({ userRole });
       navigate("/dashboard");
     } catch (err: any) {
       console.log("error", err);
