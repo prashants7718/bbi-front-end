@@ -35,6 +35,12 @@ const AvailableTest = ({username}) => {
     }
   };
 
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds}`;
+  };
+
   useEffect(() => {
     getUserTestData()
   }, [] )
@@ -74,7 +80,7 @@ const AvailableTest = ({username}) => {
                       >
                         {test.status}
                       </td>
-                      <td className="border-b p-2 ">{test.time_remaining.seconds}</td>
+                      <td className="border-b p-2 ">{test.time_remaining.seconds > -1 ? formatTime(test.time_remaining.seconds) : formatTime(300)} mins</td>
                       <td className="border-b p-2 ">
                         {test.status !== "Completed" && (
                           <FontAwesomeIcon

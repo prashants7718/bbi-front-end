@@ -4,7 +4,7 @@ import Layout from "../layout/Layout";
 import { Questionnaire } from "../../constant/questions";
 import Cookies from "js-cookie";
 import { getSpecificTest } from "../../service/testsService";
-import { getSpecificUserTest, pushSubmissionToUserTest, updateUserTestStatus } from "../../service/usertestService";
+import { calculateScore, getSpecificUserTest, pushSubmissionToUserTest, updateUserTestStatus } from "../../service/usertestService";
 
 // const OPTIONS = ["Positive", "Negative", "Neutral"];
 
@@ -127,6 +127,7 @@ const Assessment = ({ username, testData, setTestData }) => {
       setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
       setSelectedAnswer("");
     } else {
+      debugger
       const cq = questions.find(question => question.text === currentQuestion.text);
       let isCorrect = false;
 
@@ -141,13 +142,9 @@ const Assessment = ({ username, testData, setTestData }) => {
         userAnswer: selectedAnswer,
         isCorrect: isCorrect
       }
-      const result = await pushSubmissionToUserTest(username, testName, submission, timeLeft)
-      const result1 = await updateUserTestStatus(username, testName, "Completed")
-      setTestData((prevTestData: any[]) =>
-        prevTestData.map((test) =>
-          test.name === testName ? { ...test, status: "Completed" } : test
-        )
-      );
+      await pushSubmissionToUserTest(username, testName, submission, timeLeft)
+      await updateUserTestStatus(username, testName, "Completed")
+      await calculateScore(username, testName)
       navigate("/employee/dashboard");
     }
   };
