@@ -1,20 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Employees } from "../../constant/employees";
 import Layout from "../layout/Layout";
 import TeamMatching from "./TeamMatching";
+import { assignToTeam, getAllTeamEmployees, getCurrentUser, getTeams } from "../../service/userService";
+import { createAndAssignTeamWithEmployees } from "../../service/teamService";
 
-const ManagerDashboard = () => {
+const ManagerDashboard = ({username}) => {
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<string>("");
   const [newTeamName, setNewTeamName] = useState("");
   const isTableView = Employees.every((emp) => emp.TestStatus === "Completed");
   const Teams = [...new Set(Employees.map((emp) => emp.Team))];
-  const handleSelect = (employeeName: string): void => {
+  const [teams, setTeams] = useState([])
+  const [reportingEmployees, setReportingEmployees] = useState([])
+  const [currentUser, setCurrentUser] = useState(null)
+  const handleSelect = (employeeId: string): void => {
     setSelectedEmployees((prev) =>
-      prev.includes(employeeName)
-        ? prev.filter((name) => name !== employeeName)
-        : [...prev, employeeName]
+      prev.includes(employeeId)
+        ? prev.filter((name) => name !== employeeId)
+        : [...prev, employeeId]
     );
   };
   const openModal = (): void => {
@@ -23,12 +28,14 @@ const ManagerDashboard = () => {
 
   const closeModal = (): void => {
     setIsModalOpen(false);
-    setSelectedTeam(""); // Reset the selected team
+    setSelectedTeam("");
     setNewTeamName("");
+    setSelectedEmployees([]);
   };
 
-  const handleAssignToTeam = (): void => {
+  const handleAssignToTeam = async(): void => {
     if (selectedTeam) {
+      const result = await assignToTeam(selectedEmployees, selectedTeam)
       console.log(`Assigned to ${selectedTeam}:`, selectedEmployees);
       alert(`Assigned ${selectedEmployees.join(", ")} to ${selectedTeam}`);
       setSelectedEmployees([]);
@@ -39,16 +46,17 @@ const ManagerDashboard = () => {
     }
   };
 
-  const handleCreateAndAssignToTeam = () => {
+  const handleCreateAndAssignToTeam = async() => {
     if (!newTeamName) return;
 
-    // Logic to create a new team
+    alert(`Assigning employees to new team: ${newTeamName}`);
     console.log(`Creating new team: ${newTeamName}`);
 
     // Simulate adding the new team to the list of teams
     const updatedTeams = [...Teams, newTeamName];
     // setTeams(updatedTeams);
-
+    const result = await createAndAssignTeamWithEmployees(newTeamName, currentUser.company, username, selectedEmployees)
+    console.log(result)
     // Assign selected employees to the newly created team
     console.log(`Assigning employees to new team: ${newTeamName}`);
 
@@ -57,30 +65,53 @@ const ManagerDashboard = () => {
     closeModal();
   };
 
+  const getAllReportings = async() => {
+    const result = await getAllTeamEmployees(username);
+    setReportingEmployees(result)
+  }
+  const getUserTeams = async () => {
+    try {
+      const result = await getTeams(username);
+      // const updatedTeams = [{name : "All"}, ...new Set(result)];
+      setTeams(result);
+    } catch (error) {
+      console.error("Error fetching user teams:", error);
+    }
+  };
+
+  const getCurrentUserDetails = async() => {
+    const result = await getCurrentUser(username)
+    setCurrentUser(result)
+  }
+
+  useEffect (() => {
+    getCurrentUserDetails()
+    getUserTeams()
+    getAllReportings()
+  }, [])
   return (
     <Layout>
-      <div className="flex-1 p-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-3xl font-bold text-primaryBlue mb-6">
-            Dashboard
-          </h2>
-          <div className="flex py-1 mt-4">
-            {selectedEmployees.length > 0 && (
-              <button
-                onClick={openModal}
-                className="p-1 bg-primaryBlue text-white rounded shadow hover:bg-primaryBlue"
-              >
-                Assign to Team
-              </button>
-            )}
-          </div>
-        </div>
+      <div className="flex-1">
+        <div className="flex justify-between items-center"></div>
         {!isTableView ? (
           <div className="flex space-x-6 flex-col">
-            <div className="flex-1 bg-white p-6 shadow rounded-lg">
+            <div className="flex-1 bg-primaryPink p-6 shadow-lg rounded-lg">
+              <div className="flex justify-between mb-4 item-center">
+                <h2 className="text-3xl font-bold text-secondaryPink">
+                  Dashboard
+                </h2>
+                {selectedEmployees.length > 0 && (
+                  <button
+                    onClick={openModal}
+                    className="p-1 bg-secondaryPink text-white rounded shadow hover:bg-secondaryPink"
+                  >
+                    Assign to Team
+                  </button>
+                )}
+              </div>
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="text-primaryBlue">
+                  <tr className="text-secondaryPink bg-white">
                     <th className="border-b p-3"></th>
                     <th className="border-b p-3">Name</th>
                     <th className="border-b p-3">Test Status</th>
@@ -89,30 +120,30 @@ const ManagerDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {Employees.map((employee) => (
-                    <tr key={employee.Name} className="hover:bg-gray-50">
+                  {reportingEmployees.map((employee) => (
+                    <tr key={employee._id}>
                       <td className="border-b p-3">
                         <input
                           type="checkbox"
-                          checked={selectedEmployees.includes(employee.Name)}
-                          onChange={() => handleSelect(employee.Name)}
+                          checked={selectedEmployees.includes(employee._id)}
+                          onChange={() => handleSelect(employee._id)}
                           className="h-4 w-4 text-primaryBlue focus:ring-primaryBlue"
                         />
                       </td>
-                      <td className="border-b p-3">{employee.Name}</td>
+                      <td className="border-b p-3">{employee.username}</td>
                       <td
                         className={`border-b p-3 ${
-                          employee.TestStatus === "Completed"
+                          employee.testStatus === "Completed"
                             ? "text-green-500"
-                            : employee.TestStatus === "In Progress"
+                            : employee.testStatus === "In Progress"
                             ? "text-yellow-500"
                             : "text-red-500"
                         }`}
                       >
-                        {employee.TestStatus}
+                        {employee.testStatus}
                       </td>
-                      <td className="border-b p-3">{employee.Role}</td>
-                      <td className="border-b p-3">{employee.JobTitle}</td>
+                      <td className="border-b p-3">{employee.role}</td>
+                      <td className="border-b p-3">{"Software Engineer"}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -132,18 +163,19 @@ const ManagerDashboard = () => {
               </h3>
               <select
                 value={selectedTeam}
-                onChange={(e) => setSelectedTeam(e.target.value)}
+                onChange={(e) => {
+                  setSelectedTeam(e.target.value)}}
                 className="border border-gray-300 px-4 py-1 rounded w-full mb-4 bg-white text-sm"
               >
                 <option value="" disabled>
                   Select a team
                 </option>
-                {Teams.map((team) => (
-                  <option key={team} value={team}>
-                    {team}
+                <option value="create-new">Create New Team</option>
+                {teams.map((team) => (
+                  <option key={team} value={team._id}>
+                    {team.name}
                   </option>
                 ))}
-                <option value="create-new">Create New Team</option>
               </select>
 
               {selectedTeam === "create-new" && (
@@ -165,18 +197,18 @@ const ManagerDashboard = () => {
                   Cancel
                 </button>
                 <button
-                  onClick={
+                  onClick={ () => {
                     selectedTeam === "create-new"
-                      ? handleCreateAndAssignToTeam
-                      : handleAssignToTeam
-                  }
+                      ? handleCreateAndAssignToTeam()
+                      : handleAssignToTeam()
+                  }}
                   disabled={
                     selectedTeam === "create-new" ? !newTeamName : !selectedTeam
                   }
                   className={`px-4 py-1 rounded ${
                     selectedTeam &&
                     (selectedTeam !== "create-new" || newTeamName)
-                      ? "bg-primaryBlue text-white hover:bg-primaryBlue"
+                      ? "bg-secondaryPink text-white hover:bg-secondaryPink"
                       : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   }`}
                 >

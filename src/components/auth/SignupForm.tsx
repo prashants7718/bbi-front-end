@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from "react";
-import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
+import { signUp } from "../../service/authService";
 
 interface SignupFormProps {
-  onClose?: () => void;
+  onClose: () => void;
   invitationData?: { email: string; company: string; team: string };
 }
 
-const SignupForm: React.FC<SignupFormProps> = ({ onClose,invitationData }) => {
+const SignupForm: React.FC<SignupFormProps> = ({ onClose, invitationData }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: invitationData?.email || "",
     username: "",
     password: "",
     confirmPassword: "",
-    companyName: invitationData?.company || "",
+    company: invitationData?.company || "",
   });
   const [errors, setErrors] = useState({
     email: "",
@@ -27,7 +27,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onClose,invitationData }) => {
       setFormData((prev) => ({
         ...prev,
         email: invitationData.email,
-        companyName: invitationData.company,
+        company: invitationData.company,
       }));
     }
   }, [invitationData]);
@@ -35,6 +35,17 @@ const SignupForm: React.FC<SignupFormProps> = ({ onClose,invitationData }) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+  const handleCancel = () => {
+    if (location.pathname === "/") {
+      onClose();
+    } else {
+      navigate("/");
+    }
+  };
+
+  useEffect(() => {
+    console.log("FormData===", formData);
+  }, [formData]);
 
   const validate = () => {
     const newErrors = {
@@ -53,17 +64,29 @@ const SignupForm: React.FC<SignupFormProps> = ({ onClose,invitationData }) => {
     return !Object.values(newErrors).some((err) => err);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (validate()) {
       const userData = {
-        username: formData.username,
         email: formData.email,
-        companyName:formData.companyName
+        username: formData.username,
+        password: formData.password,
+        company: formData.company,
       };
-      Cookies.set("user", JSON.stringify(userData), { expires: 7 });
-      navigate("/dashboard");
-      // alert("Signed up successfully!");
-      onClose();
+      try {
+        const response = await signUp(userData);
+        console.log(response.user);
+        const userRole = response.user.role;
+        console.log("response ", response);
+        sessionStorage.setItem("accessToken", response.token)
+        if (userRole === "Manager") {
+          navigate("/manager/dashboard");
+        } else if (userRole === "Employee") {
+          navigate("/employee/dashboard");
+        }
+        onClose();
+      } catch (error) {
+        console.error("Error during signup:", error);
+      }
     }
   };
 
@@ -83,6 +106,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onClose,invitationData }) => {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="Enter your email"
+                readOnly={!!invitationData}
                 className={`w-full px-4 py-1 h-9 border text-sm ${
                   errors.email ? "border-red-500" : "border-gray-300"
                 } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
@@ -150,10 +174,11 @@ const SignupForm: React.FC<SignupFormProps> = ({ onClose,invitationData }) => {
           <div>
             <input
               type="text"
-              name="companyName"
-              value={formData.companyName.trim()}
+              name="company"
+              value={formData.company.trim()}
               onChange={handleChange}
               placeholder={"Enter your company name"}
+              readOnly={!!invitationData}
               className={`w-full px-4 py-1 h-9 border text-sm ${
                 errors.username ? "border-red-500" : "border-gray-300"
               } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
@@ -168,7 +193,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onClose,invitationData }) => {
             Sign Up
           </button>
           <button
-            onClick={onClose}
+            onClick={handleCancel}
             className="w-44 py-1 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
           >
             Cancel

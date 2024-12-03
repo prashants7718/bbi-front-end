@@ -1,72 +1,85 @@
 import { faPlayCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AssessmentStartDialog from "../../pages/AssessmentStartDialog";
 import Layout from "../layout/Layout";
 import Popup from "../layout/Popup";
+import { getUserTests, updateUserTestStatus } from "../../service/usertestService";
 
-const AvailableTest = ({ testData, setTestData }) => {
+const AvailableTest = ({username}) => {
+  console.log(username)
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [currentTestName, setCurrentTestName] = useState("");
+  const [testData, setTestData] = useState<Test[] | null>(null);
   const navigate = useNavigate();
-  const availableTest = testData.filter(
-    (test: any) => test.status === "Not Started"
-  );
   const handleStartClick = (testName: string) => {
     setCurrentTestName(testName);
     setIsPopupOpen(true);
   };
 
-  const handleStartTest = () => {
-    navigate(`/test/${currentTestName}`);
+  const handleStartTest = async() => {
+    const result = await updateUserTestStatus(username, currentTestName, "In progress")
+    console.log(result)
+    navigate(`/employee/test/${currentTestName}`);
     setIsPopupOpen(false);
   };
+  const getUserTestData = async () => {
+    try {
+      const result = await getUserTests(username, "Not started");
+      setTestData(result);
+      console.log(result)
+    } catch (error) {
+      console.error("Error fetching user tests:", error);
+      setTestData([]); 
+    }
+  };
+
+  useEffect(() => {
+    getUserTestData()
+  }, [] )
   return (
     <Layout>
       <div className="flex h-screen">
-        <div className="flex-1 p-6">
-          <h2 className="text-3xl font-bold text-primaryBlue mb-6">
-            Available Tests
-          </h2>
+        <div className="flex-1 p-4">
           <div className="flex space-x-6">
-            <div className="flex-1 bg-white p-4 shadow rounded-lg">
-              <h3 className="text-xl font-bold text-primaryBlue mb-4">
-                Test Overview
-              </h3>
+            <div className="flex-1 bg-primaryPink p-5 shadow-xl rounded-lg">
+              <h2 className="text-3xl font-bold text-secondaryPink mb-6">
+                Available Tests
+              </h2>
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="text-primaryBlue">
-                    <th className="border-b py-2">Test Name</th>
-                    <th className="border-b py-2">Status</th>
-                    <th className="border-b py-2">Time Remaining</th>
-                    <th className="border-b py-2">Action</th>
+                  <tr className="text-secondaryPink bg-white">
+                    <th className="border-b p-2">Test Name</th>
+                    <th className="border-b p-2">Status</th>
+                    <th className="border-b p-2">Time Remaining</th>
+                    <th className="border-b p-2">Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {availableTest.map((test: any) => (
+                {testData?.map((test: any) => (
                     <tr
-                      key={test.id}
-                      className="text-gray-700 hover:bg-grayBackground"
+                      key={test._id}
+                      className="text-gray-700"
                     >
-                      <td className="border-b py-2">{test.name}</td>
+                      <td className="border-b p-2">{test.testname}</td>
                       <td
-                        className={`border-b py-2 ${
+                        className={`border-b p-2  ${
                           test.status === "Completed"
                             ? "text-green-500"
-                            : test.status === "In Progress"
+                            : test.status === "In progress"
                             ? "text-yellow-500"
                             : "text-red-500"
                         }`}
                       >
                         {test.status}
                       </td>
-                      <td className="border-b py-2">{test.timeRemaining}</td>
-                      <td className="border-b py-2">
+                      <td className="border-b p-2 ">{test.time_remaining.seconds}</td>
+                      <td className="border-b p-2 ">
                         {test.status !== "Completed" && (
                           <FontAwesomeIcon
                             icon={faPlayCircle}
-                            onClick={() => handleStartClick(test.name)}
+                            onClick={() => handleStartClick(test.testname)}
                             className="cursor-pointer text-primaryBlue hover:text-primaryBlue"
                             title="Start or Continue Test"
                             size="lg"

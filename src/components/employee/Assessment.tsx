@@ -3,13 +3,16 @@ import { useParams, useNavigate } from "react-router-dom";
 import Layout from "../layout/Layout";
 import { Questionnaire } from "../../constant/questions";
 import Cookies from "js-cookie";
+import { getSpecificTest } from "../../service/testsService";
+import { getSpecificUserTest, pushSubmissionToUserTest, updateUserTestStatus } from "../../service/usertestService";
 
-const OPTIONS = ["Positive", "Negative", "Neutral"];
+// const OPTIONS = ["Positive", "Negative", "Neutral"];
 
-const Assessment = ({ testData, setTestData }) => {
+const Assessment = ({ username, testData, setTestData }) => {
   const { testName } = useParams<{ testName: string }>();
   const navigate = useNavigate();
-  const questions = Questionnaire[testName as keyof typeof Questionnaire] || [];
+  const [questions, setQuestions] = useState([]);
+  const [options, setOptions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [responses, setResponses] = useState<{ [key: number]: string }>({});
   const [selectedAnswer, setSelectedAnswer] = useState<string>("");
@@ -27,19 +30,41 @@ const Assessment = ({ testData, setTestData }) => {
   const timeInSeconds = parseInt(timeRemainingString) * 60;
   const [timeLeft, setTimeLeft] = useState(timeInSeconds);
   const [isTimeUp, setIsTimeUp] = useState(false);
+  const [timeRemained, setTimeRemained] = useState(0);
 
+  const getTestDataByName = async () => {
+    const result = await getSpecificTest(testName);
+    const que = result.questions;
+    console.log(result.questions);
+    setQuestions(que)
+    const testFetched = await getSpecificUserTest(username, testName)
+    if (testFetched.userSubmission.length > 0) {
+      setCurrentQuestionIndex(testFetched.userSubmission.length)
+    }
+    if (testFetched.time_remaining.seconds > -1) {
+      setTimeLeft(testFetched.time_remaining.seconds)
+    }
+    else {
+      setTimeLeft(result.allocated_time)
+    }
+  };
+
+  useEffect(() => {
+    getTestDataByName();
+  }, []);
   useEffect(() => {
     if (timeLeft === 0) {
       setIsTimeUp(true);
       return;
     }
-    console.log("timeLeft========>>",timeLeft)
+    console.log("timeLeft========>>", timeLeft);
     const timerId = setInterval(() => {
       setTimeLeft((prevTime) => prevTime - 1);
+      // setTimeRemained(seconds)
     }, 1000);
+    
     return () => clearInterval(timerId);
   }, [timeLeft]);
-
 
   useEffect(() => {
     const savedScore = Cookies.get(`${testName}-score`);
@@ -54,7 +79,7 @@ const Assessment = ({ testData, setTestData }) => {
   }, [score, testName]);
   const handleTimeUpDialogClose = () => {
     setIsTimeUp(false);
-    navigate("/dashboard");
+    navigate("/employee/dashboard");
   };
 
   const handleSave = () => {
@@ -82,20 +107,50 @@ const Assessment = ({ testData, setTestData }) => {
     updatedAnswerSavedArray[currentQuestionIndex] = false;
     setIsAnswerSavedArray(updatedAnswerSavedArray);
   };
-  const handleNext = () => {
+  const handleNext = async() => {
     if (currentQuestionIndex < questions.length - 1) {
+      const cq = questions.find(question => question.text === currentQuestion.text);
+      let isCorrect = false;
+
+      if (cq && cq.answer === selectedAnswer) {
+        isCorrect = true;
+      }
+      const submission = {
+        questionText: currentQuestion.text,
+        options: currentQuestion.options,
+        correctAnswer: currentQuestion.answer,
+        userAnswer: selectedAnswer,
+        isCorrect: isCorrect
+      }
+
+      const result = await pushSubmissionToUserTest(username, testName, submission, timeLeft)
       setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
       setSelectedAnswer("");
     } else {
+      const cq = questions.find(question => question.text === currentQuestion.text);
+      let isCorrect = false;
+
+      if (cq && cq.answer === selectedAnswer) {
+        isCorrect = true;
+      }
+
+      const submission = {
+        questionText: currentQuestion.text,
+        options: currentQuestion.options,
+        correctAnswer: currentQuestion.answer,
+        userAnswer: selectedAnswer,
+        isCorrect: isCorrect
+      }
+      const result = await pushSubmissionToUserTest(username, testName, submission, timeLeft)
+      const result1 = await updateUserTestStatus(username, testName, "Completed")
       setTestData((prevTestData: any[]) =>
         prevTestData.map((test) =>
           test.name === testName ? { ...test, status: "Completed" } : test
         )
       );
-      navigate("/dashboard");
+      navigate("/employee/dashboard");
     }
   };
-
   if (!questions.length) {
     return (
       <div className="flex items-center justify-center h-screen text-red-500">
@@ -116,33 +171,33 @@ const Assessment = ({ testData, setTestData }) => {
   };
   return (
     <Layout hideSidebar>
-      <div className="flex justify-start bg-white shadow-lg rounded-md h-full/2 pt-4 pl-6 pr-6 pb-4">
+      <div className="flex justify-start bg-primaryPink shadow-xl rounded-md h-full/2 pt-4 pl-6 pr-6 pb-4">
         <div className="w-full m-8">
-          <h2 className="text-2xl font-bold text-primaryBlue mb-4 text-left">
+          <h2 className="text-xl font-bold text-secondaryPink mb-4 text-left">
             {testName} Test
           </h2>
           <div className="flex justify-between">
-            <p className="text-base font-medium text-gray-700 mb-4">
+            <p className="text-base font-medium text-secondaryPink mb-4">
               Question {currentQuestionIndex + 1} of {totalQuestions} (1.00
               Marks)
             </p>
             <p>{formatTime(timeLeft)}</p>
           </div>
-          <p className="text-sm text-gray-600 text-start mb-1">
+          <p className="text-sm text-secondaryPink text-start mb-1">
             {completedQuestions} Question{completedQuestions !== 1 ? "s" : ""}{" "}
             completed
           </p>
           <div className="w-full bg-gray-200 rounded-full h-4 mb-4">
             <div
-              className="bg-primaryBlue h-4 rounded-full"
+              className="bg-secondaryPink h-4 rounded-full"
               style={{ width: `${progressPercentage}%` }}
             ></div>
           </div>
           <p className="mb-6 text-2xl font-bold text-gray-800">
-            {currentQuestion.question}
+            {currentQuestion.text}
           </p>
           <div className="flex flex-col space-y-4">
-            {OPTIONS.map((option, index) => (
+            {currentQuestion.options.map((option, index) => (
               <label key={index} className="flex items-center space-x-3">
                 <input
                   type="radio"
@@ -152,7 +207,7 @@ const Assessment = ({ testData, setTestData }) => {
                   onChange={(e) => handleAnswerChange(e.target.value)}
                   className="form-radio text-red-800"
                 />
-                <span className="text-gray-700">{option}</span>
+                <span className="text-secondaryPink">{option}</span>
               </label>
             ))}
           </div>
@@ -165,7 +220,7 @@ const Assessment = ({ testData, setTestData }) => {
               className={`px-4 py-2 rounded ${
                 !selectedAnswer || isAnswerSavedArray[currentQuestionIndex]
                   ? "bg-gray-300 text-gray-700 cursor-not-allowed"
-                  : "bg-primaryBlue text-white hover:bg-primaryBlue"
+                  : "bg-secondaryPink text-white hover:bg-secondaryPink"
               }`}
             >
               Save Answer
@@ -176,7 +231,7 @@ const Assessment = ({ testData, setTestData }) => {
               className={`px-4 py-1 rounded ${
                 !isAnswerSavedArray[currentQuestionIndex]
                   ? "bg-gray-300 text-gray-700 cursor-not-allowed"
-                  : "bg-primaryBlue text-white hover:bg-primaryBlue"
+                  : "bg-secondaryPink text-white hover:bg-secondaryPink"
               }`}
             >
               {currentQuestionIndex === questions.length - 1
