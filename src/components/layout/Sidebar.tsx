@@ -2,13 +2,11 @@ import {
   faChartPie,
   faCirclePlay,
   faCircleStop,
-  faPeopleGroup,
   faUserCircle,
   faUsers,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
-import { Roles } from "../../constant/enum";
 
 interface MenuItem {
   label: string;
@@ -20,35 +18,35 @@ const menuConfig: Record<string, MenuItem[]> = {
   Employee: [
     {
       label: "Dashboard",
-      href: "/dashboard",
+      href: "/employee/dashboard",
       icon: <FontAwesomeIcon icon={faChartPie} />,
     },
     {
       label: "Available Test",
-      href: "/available-tests",
+      href: "/employee/available-tests",
       icon: <FontAwesomeIcon icon={faCirclePlay} />,
     },
     {
       label: "Archive",
-      href: "/archive",
+      href: "/employee/archive",
       icon: <FontAwesomeIcon icon={faCircleStop} />,
     },
   ],
   Manager: [
     {
       label: "Dashboard",
-      href: "/dashboard",
+      href: "/manager/dashboard",
       icon: <FontAwesomeIcon icon={faChartPie} />,
     },
 
     {
       label: "Teams",
-      href: "/teams",
+      href: "/manager/teams",
       icon: <FontAwesomeIcon icon={faUsers} />,
     },
     {
       label: "User Management",
-      href: "/user-management",
+      href: "/manager/user-management",
       icon: <FontAwesomeIcon icon={faUserCircle} />,
     },
   ],

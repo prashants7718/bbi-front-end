@@ -1,14 +1,15 @@
 import { faPlayCircle } from "@fortawesome/free-solid-svg-icons"; // Play Circle icon
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; // Font Awesome component
 import "chart.js/auto";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AssessmentStartDialog from "../../pages/AssessmentStartDialog";
 import Layout from "../layout/Layout";
 import Popup from "../layout/Popup";
 import { TestItem } from "../../App";
+import { getAllUserTests, updateUserTestStatus } from "../../service/usertestService";
 
-const EmployeeDashboard = ({ testData }) => {
+const EmployeeDashboard = ({ username }) => {
   const navigate = useNavigate();
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   // const statusCounts = {
@@ -40,49 +41,52 @@ const EmployeeDashboard = ({ testData }) => {
   //     },
   //   },
   // };
-
+  const [userTestData, setUserTestData] = useState<Test[] | null>(null);
+  const getUserTestsDetails = async () => {
+    const result = await getAllUserTests(username);
+    setUserTestData(result)
+  }
   const handleStartClick = (testName: string) => {
     setCurrentTestName(testName);
     setIsPopupOpen(true);
   };
 
-  const handleStartTest = () => {
-    navigate(`/test/${currentTestName}`);
+  const handleStartTest = async() => {
+    const result = await updateUserTestStatus(username, currentTestName, "In progress")
+    console.log(result)
+    navigate(`/employee/test/${currentTestName}`);
   };
+
+  useEffect(() => {
+    getUserTestsDetails()
+  }, [])
   return (
     <Layout>
-      <div className="flex">
         {/* Main Content */}
-        <div className="flex-1 p-6">
-          <h2 className="text-3xl font-bold text-primaryBlue mb-6">
-            Dashboard
-          </h2>
-
-          {/* Table and Pie Chart Section */}
-          <div className="flex space-x-6">
-            {/* Table */}
-            <div className="flex-1 bg-white p-4 shadow rounded-lg">
-              <h3 className="text-xl font-bold text-primaryBlue mb-4">
-                Test Overview
-              </h3>
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="text-primaryBlue">
-                    <th className="border-b py-2">Test Name</th>
-                    <th className="border-b py-2">Status</th>
-                    <th className="border-b py-2">Time Remaining</th>
-                    <th className="border-b py-2">Action</th>
-                  </tr>
-                </thead>
+        <div className="flex-1 p-4">
+        <div className="flex space-x-6">
+          <div className="flex-1 bg-primaryPink p-5 shadow-xl rounded-lg ">
+            <h2 className="text-3xl font-bold text-secondaryPink mb-6">
+              Dashboard
+            </h2>
+            <table className="w-full border-collapse text-left">
+              <thead>
+                <tr className="text-secondaryPink bg-white">
+                  <th className="border-b p-2">Test Name</th>
+                  <th className="border-b p-2">Status</th>
+                  <th className="border-b p-2">Time Remaining</th>
+                  <th className="border-b p-2">Action</th>
+                </tr>
+              </thead>
                 <tbody>
-                  {testData.map((test: TestItem) => (
+                  {userTestData?.map((test: TestItem) => (
                     <tr
                       key={test.id}
-                      className="text-gray-700 hover:bg-grayBackground"
+                      className="text-gray-700"
                     >
-                      <td className="border-b py-2">{test.name}</td>
+                      <td className="border-b p-2">{test.testname}</td>
                       <td
-                        className={`border-b py-2 ${
+                        className={`border-b p-2 ${
                           test.status === "Completed"
                             ? "text-green-500"
                             : test.status === "In Progress"
@@ -92,12 +96,15 @@ const EmployeeDashboard = ({ testData }) => {
                       >
                         {test.status}
                       </td>
-                      <td className="border-b py-2">{test.timeRemaining}</td>
-                      <td className="border-b py-2">
+                      <td className="border-b p-2">{test.status !== 'Completed'
+                                        ? (test?.time_remaining?.seconds > -1 ? `${test?.time_remaining?.seconds} secs` 
+                                        : '300 secs') : '-'}
+                      </td>
+                      <td className="border-b p-2">
                         {test.status !== "Completed" ? (
                           <FontAwesomeIcon
                             icon={faPlayCircle}
-                            onClick={() => handleStartClick(test.name)}
+                            onClick={() => handleStartClick(test.testname)}
                             className="cursor-pointer text-primaryBlue hover:text-primaryBlue"
                             title="Start or Continue Test"
                             size="lg"
@@ -111,14 +118,7 @@ const EmployeeDashboard = ({ testData }) => {
                 </tbody>
               </table>
             </div>
-
-            {/* Pie Chart */}
-            {/* <div className="w-1/3 bg-white p-4 shadow rounded-lg">
-              <h3 className="text-xl font-bold text-primaryBlue mb-4">Test Status Distribution</h3>
-              <Pie data={chartData} options={chartOptions} />
-            </div> */}
           </div>
-        </div>
       </div>
       <Popup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)}>
         <AssessmentStartDialog

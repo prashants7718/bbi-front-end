@@ -147,39 +147,41 @@ export default function TeamMatching() {
   };
 
   return (
-    <div className="flex-1 ">
-      <h2 className="text-3xl font-bold text-primaryBlue mb-2">
+    <div className="flex-1">
+      <h2 className="text-3xl font-bold text-secondaryPink mb-2">
         Team Matching
       </h2>
       <div className="flex gap-4">
         <button
-          className="p-1 px-2 bg-primaryBlue text-white rounded shadow hover:bg-primaryBlue"
+          className="p-1 px-2 bg-secondaryPink text-white rounded shadow hover:bg-secondaryPink"
           onClick={() => {
             setIsTeamGeneration(true);
           }}
         >
           Create Team
         </button>
-        {isTeamGeneration && (<button
-          className="px-4 py-1 bg-gray-400 text-gray-800 rounded hover:bg-gray-400"
-          onClick={() => {
-            setRows([
-              { id: `${new Date().getTime()}`, teamSize: 1, jobTitle: "" },
-            ]);
-            setIsTeamGeneration(false);
-            setShowTeam(false);
-          }}
-        >
-          Cancel
-        </button>)}
+        {isTeamGeneration && (
+          <button
+            className="px-4 py-1 bg-gray-400 text-gray-800 rounded hover:bg-gray-400"
+            onClick={() => {
+              setRows([
+                { id: `${new Date().getTime()}`, teamSize: 1, jobTitle: "" },
+              ]);
+              setIsTeamGeneration(false);
+              setShowTeam(false);
+            }}
+          >
+            Cancel
+          </button>
+        )}
       </div>
       {isTeamGeneration && (
         <>
-          <div className="flex flex-col bg-white p-4 shadow rounded-lg justify-around mt-4 space-y-2">
+          <div className="flex flex-col bg-primaryPink p-4 shadow-lg rounded-lg justify-around mt-4 space-y-2">
             {rows.map((row, i) => (
               <div
                 key={row.id}
-                className="flex bg-white p-2 items-center space-x-20"
+                className="flex bg-primaryPink p-2 items-center space-x-20"
               >
                 <div className="mb-6 w-56">
                   <label className="block text-sm font-semibold mb-2">
@@ -244,7 +246,7 @@ export default function TeamMatching() {
               Total Team Members: {calculateTotalTeamMembers()}
             </h3>
             <button
-              className="px-6 py-3 bg-primaryBlue text-white font-semibold rounded-full shadow hover:bg-primaryBlue"
+              className="px-6 py-3 bg-secondaryPink text-white font-semibold rounded-full shadow hover:bg-secondaryPink"
               onClick={() => {
                 generateTeam();
               }}
@@ -256,11 +258,13 @@ export default function TeamMatching() {
       )}
 
       {showTeam && generatedTeam.length > 0 && (
-        <div className="mt-6 bg-white p-4 shadow rounded-lg ">
-          <h3 className="text-xl font-bold mb-4">Generated Team Members:</h3>
+        <div className="mt-6 bg-primaryPink p-4 shadow-lg rounded-lg ">
+          <h3 className="text-xl font-bold mb-4 text-secondaryPink">
+            Generated Team Members:
+          </h3>
           <table className="min-w-full table-auto">
             <thead>
-              <tr>
+              <tr className="text-secondaryPink bg-white">
                 <th className="px-4 py-2 text-left">Name</th>
                 <th className="px-4 py-2 text-left">Job Title</th>
                 <th className="px-4 py-2 text-left">Team</th>

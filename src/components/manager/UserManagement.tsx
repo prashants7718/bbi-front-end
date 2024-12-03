@@ -1,16 +1,16 @@
 import {
-  faCircleChevronLeft,
-  faCircleChevronRight,
-  faEnvelope,
+  faEnvelope
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Employees } from "../../constant/employees";
 import InvitationDialog from "../../pages/InvitationDialog";
 import Layout from "../layout/Layout";
 import Popup from "../layout/Popup";
+import { getAllTeamEmployees, getTeams } from "../../service/userService";
+import { getSortedTeamsWithName } from "../../service/teamService";
 
-const UserManagement = () => {
+const UserManagement = ({ username }) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
   const handleSendInvitation = () => {
@@ -20,7 +20,8 @@ const UserManagement = () => {
   const [selectedTeam, setSelectedTeam] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
+  const [reportingEmployees, setReportingEmployees] = useState([])
+  const [userTeams, setUserTeams] = useState([{name : "All"}]);
   const uniqueTeams = ["All", ...new Set(Employees.map((emp) => emp.Team))];
 
   const sortedEmployees = Employees.slice().sort((a, b) =>
@@ -44,45 +45,72 @@ const UserManagement = () => {
   );
   const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
 
+  const getAllReportings = async() => {
+    const result = await getAllTeamEmployees(username);
+    setReportingEmployees(result)
+  }
+  const getUserTeams = async () => {
+    try {
+      const result = await getTeams(username);
+      const updatedTeams = [{name : "All"}, ...new Set(result)];
+      setUserTeams(updatedTeams);
+    } catch (error) {
+      console.error("Error fetching user teams:", error);
+    }
+  };
+
+  const getSortedTeam = async(id) => {
+    const result = await getSortedTeamsWithName(username, id)
+    setReportingEmployees(result)
+  }
+
+  useEffect (() => {
+    getAllReportings()
+    getUserTeams()
+  }, [])
+
   return (
     <Layout>
-      <div className="p-6">
-        <div>
-          <h2 className="text-3xl font-bold text-primaryBlue">
-            User Management
-          </h2>
-          <div className="flex justify-end p-1">
-            <button
-              className="mb-1 p-1 px-5 bg-primaryBlue text-white rounded shadow hover:bg-primaryBlue"
-              onClick={() => setIsPopupOpen(true)}
-            >
-              <FontAwesomeIcon icon={faEnvelope} className="mr-2" />
-              Invite
-            </button>
-          </div>
-        </div>
-        <div className="items-center justify-between bg-white p-6 shadow rounded-lg">
+      <div>
+        <div className="items-center justify-between bg-primaryPink p-4 shadow-lg rounded-lg">
           <div className="p-1">
-            <div className="mb-1 flex justify-start items-center">
-              <label className="text-base font-medium text-gray-70 ml-2">
-                Filter by Team:
+            <div className="flex justify-between p-1 items-center">
+              <h2 className="text-3xl font-bold text-secondaryPink">
+                User Management
+              </h2>
+              <button
+                className="mb-1 p-1 px-5 bg-secondaryPink text-white rounded shadow hover:bg-secondaryPink"
+                onClick={() => setIsPopupOpen(true)}
+              >
+                <FontAwesomeIcon icon={faEnvelope} className="mr-2" />
+                Invite
+              </button>
+            </div>
+            <div className="mt-2  flex justify-start items-center">
+              <label className="text-sm font-medium text-gray-70 ml-2">
+                Sort by Team:
               </label>
               <select
                 id="teamFilter"
-                className="ml-2 border rounded shadow-sm "
+                className="ml-2 border rounded shadow-sm text-sm"
                 value={selectedTeam}
-                onChange={(e) => setSelectedTeam(e.target.value)}
+                onChange={(e) => {
+                  getSortedTeam(e.target.value)
+                  setSelectedTeam(e.target.value)
+                }}
               >
-                {uniqueTeams.map((team) => (
-                  <option key={team} value={team} className="text-sm">
-                    {team}
+                {userTeams.map((team) => (
+                  <option key={team._id} value={team._id} className="text-sm" onClick={() => {
+                    getSortedTeam(team._id)
+                  }}>
+                    {team.name}
                   </option>
                 ))}
               </select>
             </div>
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse mt-2">
               <thead>
-                <tr className="text-primaryBlue">
+                <tr className="text-secondaryPink bg-white">
                   <th className="border-b p-3">Name</th>
                   <th className="border-b p-3">Test Status</th>
                   <th className="border-b p-3">Job Title</th>
@@ -90,22 +118,22 @@ const UserManagement = () => {
                 </tr>
               </thead>
               <tbody>
-                {currentEmployees.map((employee) => (
-                  <tr key={employee.Name} className="hover:bg-gray-50">
-                    <td className="border-b p-3">{employee.Name}</td>
+                {reportingEmployees.map((employee) => (
+                  <tr key={employee.username}>
+                    <td className="border-b p-3">{employee.username}</td>
                     <td
                       className={`border-b p-3 ${
-                        employee.TestStatus === "Completed"
+                        employee.testStatus === "Completed"
                           ? "text-green-500"
-                          : employee.TestStatus === "In Progress"
+                          : employee.testStatus === "In Progress"
                           ? "text-yellow-500"
                           : "text-red-500"
                       }`}
                     >
-                      {employee.TestStatus}
+                      {employee.testStatus}
                     </td>
-                    <td className="border-b p-3">{employee.JobTitle}</td>
-                    <td className="border-b p-3">{employee.Team}</td>
+                    <td className="border-b p-3">{employee.role}</td>
+                    <td className="border-b p-3">{employee.teamNames.toString()}</td>
                   </tr>
                 ))}
               </tbody>
@@ -132,7 +160,7 @@ const UserManagement = () => {
       </div>
       <Popup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)}>
         <InvitationDialog
-          handleSendInvitation={handleSendInvitation}
+          //handleSendInvitation={handleSendInvitation}
           onClose={() => setIsPopupOpen(false)}
         />
       </Popup>

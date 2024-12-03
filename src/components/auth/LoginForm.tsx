@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import { login } from "../../service/authService";
-import { getUserRoleFromToken } from "../../config/getUserRole";
+import { getUserDetailsFromToken } from "../../utils/getUserRole"; 
 
 interface LoginFormProps {
   onClose: () => void;
@@ -27,31 +26,20 @@ const LoginForm: React.FC<LoginFormProps> = ({ onClose }) => {
     return !Object.values(newErrors).some((err) => err);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (validate()) {
-      const userData = {
-        username: formData.username,
-      };
-      // Cookies.set("user", JSON.stringify(userData), { expires: 7 });
-      handleLogin();
-      navigate("/dashboard");
-      // alert("Logged in successfully!");
-      onClose();
-    }
-  };
-  const handleLogin = async () => {
-    console.log("in Login handler");
-    try {
       const { token } = await login(formData.username, formData.password);
       sessionStorage.setItem("accessToken", token);
-      // window.location.href = "/dashboard";
-      const userRole = getUserRoleFromToken();
-      console.log({ userRole });
-      navigate("/dashboard");
-    } catch (err: any) {
-      console.log("error", err);
+      const user = getUserDetailsFromToken();
+
+      if (user.role === "Employee") {
+        navigate("/employee/dashboard");
+      } else if (user.role === "Manager") {
+        navigate("/manager/dashboard");
+      }
     }
   };
+
   return (
     <div className="px-4 bg-white rounded-lg">
       <h2 className="text-3xl font-bold mb-6 text-center text-primaryBlue">

@@ -3,14 +3,13 @@ import {
   faGear,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 
 const ProfileMenu = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    Cookies.remove("user");
+    window.sessionStorage.removeItem("accessToken");
     navigate("/");
   };
   const handleSettings = () => {

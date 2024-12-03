@@ -52,7 +52,7 @@ const AssessmentStartDialog = ({ handleStartTest, onClose }: TestDialogProps) =>
           </button>
           <button
             onClick={handleStartTest}
-            className="px-6 py-2 text-sm font-medium text-white bg-primaryBlue rounded-lg hover:bg-primaryBlue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primaryBlue"
+            className="px-6 py-2 text-sm font-medium text-white bg-secondaryPink rounded-lg hover:bg-secondaryPink focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondaryPink"
           >
             Start
           </button>

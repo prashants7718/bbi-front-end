@@ -1,29 +1,31 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import SignupForm from "../components/auth/SignupForm";
+import { verifyUser } from "../service/invitationService";
+import Home from "./Home";
 
 const InviteSignup = () => {
-  const { code } = useParams();
+  const { code: verificationCode } = useParams();
   const navigate = useNavigate();
   const [invitationData, setInvitationData] = useState(null);
   const [error, setError] = useState("");
 
-//   useEffect(() => {
-//     const validateCode = async () => {
-//       try {
-//         const response = await fetch(`/api/invitations/${code}`);
-//         if (!response.ok) {
-//           throw new Error("Invalid or expired invitation code");
-//         }
-//         const data = await response.json();
-//         setInvitationData(data);
-//       } catch (err) {
-//         setError(err.message);
-//       }
-//     };
+  useEffect(() => {
+    console.log("verificationCode", verificationCode);
+    const validateCode = async () => {
+      try {
+        const response = await verifyUser({ code: verificationCode });
+        console.log({ response });
+        setInvitationData(response);
+      } catch (err: any) {
+        setError(err.message);
+      }
+    };
 
-//     validateCode();
-//   }, [code]);
+    if (verificationCode) {
+      validateCode();
+    }
+  }, [verificationCode, navigate]);
 
   if (error) {
     return (
@@ -43,7 +45,12 @@ const InviteSignup = () => {
     return <p className="text-center mt-20">Validating invitation...</p>;
   }
 
-  return <SignupForm invitationData={invitationData} />;
+  return (
+    <>
+      <Home />
+      <SignupForm invitationData={invitationData} />
+    </>
+  );
 };
 
 export default InviteSignup;

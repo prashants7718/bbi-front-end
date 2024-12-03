@@ -1,26 +1,46 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Employees } from "../constant/employees";
+import { inviteUser } from "../service/managerService";
+import { useNavigate } from "react-router-dom";
+
 interface UserManagementProps {
-  handleSendInvitation: () => void;
+  handleSendInvitation?: () => void;
   onClose: () => void;
 }
-
-const InvitationDialog = ({
-  handleSendInvitation,
-  onClose,
-}: UserManagementProps) => {
+const InvitationDialog = ({ onClose }: UserManagementProps) => {
+  const [selectedTeam, setSelectedTeam] = useState<string>();
   const [formData, setFormData] = useState({
     email: "",
-    name: "",
+    company: "HT",
+    team: selectedTeam,
   });
-  const [selectedTeam, setSelectedTeam] = useState<string | undefined>(
-    undefined
-  );
+  const navigate = useNavigate();
+
+  const [message, setMessage] = useState<string>("");
   const uniqueTeams = [...new Set(Employees.map((emp) => emp.Team))];
-  console.log(formData, selectedTeam);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+  useEffect(() => {
+    console.log("formData=======", formData);
+  }, [formData]);
+
+  const handleInvite = async () => {
+    try {
+      await inviteUser(formData);
+      onClose();
+    } catch (error: any) {
+      setMessage(
+        error.response?.data?.error ||
+          "Failed to send invitation. Please try again."
+      );
+    }
+  };
+  const handleTeamChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newTeam = e.target.value;
+    setSelectedTeam(newTeam);
+    setFormData((prev) => ({ ...prev, team: newTeam }));
   };
 
   return (
@@ -46,7 +66,7 @@ const InvitationDialog = ({
               className={`w-full px-4 py-1  border text-sm  rounded-md focus:outline-none focus:ring-2 focus:ring-primaryBlue`}
             />
           </div>
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium mb-2">
               Name(Optional)
             </label>
@@ -58,17 +78,17 @@ const InvitationDialog = ({
               onChange={handleChange}
               className={`w-full px-4 py-1   border text-sm   rounded-md focus:outline-none focus:ring-2 focus:ring-primaryBlue`}
             />
-          </div>
+          </div> */}
           <div>
             <label className="block text-sm font-medium mb-2">Team</label>
             <select
               id="teamFilter"
-              className="px-4 py-1 border rounded shadow-sm w-full bg-white"
+              className="px-4 py-1 border rounded shadow-sm w-full bg-white text-sm"
               value={selectedTeam}
-              onChange={(e) => setSelectedTeam(e.target.value)}
+              onChange={handleTeamChange}
             >
               <option disabled selected>
-                select an option
+                Select a team
               </option>
               {uniqueTeams.map((team) => (
                 <option key={team} value={team}>
@@ -86,8 +106,8 @@ const InvitationDialog = ({
             Cancel
           </button>
           <button
-            className="px-6 py-2 text-sm font-medium text-white bg-primaryBlue rounded-lg hover:bg-primaryBlue "
-            onClick={handleSendInvitation}
+            className="px-6 py-2 text-sm font-medium text-white bg-secondaryPink rounded-lg hover:bg-secondaryPink "
+            onClick={handleInvite}
             type="submit"
           >
             Send Invitation
