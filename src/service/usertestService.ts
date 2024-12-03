@@ -113,3 +113,23 @@ export const pushSubmissionToUserTest = async (
     }
   }
 };
+
+export const calculateScore = async (
+  username: string,
+  testname: string
+): Promise<UserTest> => {
+  try {
+    const response = await axiosInstance.post<UserTest>(`/calculateScore`, {
+      username,
+      testname
+    });
+    console.debug("Response data:", response.data);
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    } else {
+      throw new Error(error.message || "An error occurred.");
+    }
+  }
+};

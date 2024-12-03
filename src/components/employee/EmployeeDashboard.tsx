@@ -56,6 +56,11 @@ const EmployeeDashboard = ({ username }) => {
     console.log(result)
     navigate(`/employee/test/${currentTestName}`);
   };
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds}`;
+  };
 
   useEffect(() => {
     getUserTestsDetails()
@@ -97,8 +102,8 @@ const EmployeeDashboard = ({ username }) => {
                         {test.status}
                       </td>
                       <td className="border-b p-2">{test.status !== 'Completed'
-                                        ? (test?.time_remaining?.seconds > -1 ? `${test?.time_remaining?.seconds} secs` 
-                                        : '300 secs') : '-'}
+                                        ? (test?.time_remaining?.seconds > -1 ? `${formatTime(test?.time_remaining?.seconds)} mins`
+                                        : `${formatTime(300)} mins`) : '-'}
                       </td>
                       <td className="border-b p-2">
                         {test.status !== "Completed" ? (

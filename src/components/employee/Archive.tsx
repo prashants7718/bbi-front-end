@@ -61,7 +61,7 @@ const Archive = ({ username }) => {
                         {test.status}
                       </td>
                       <td className="border-b p-2">
-                        {getScoreForTest(test.name)}
+                        {test.score}
                       </td>
                     </tr>
                   ))}
