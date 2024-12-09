@@ -14,21 +14,21 @@ const Home = () => {
   };
 
   return (
-    <Layout>
+    <Layout isHomePage>
       <div className="flex flex-col items-center justify-center mt-20">
-        <div className="w-full max-w-lg p-6 bg-grayBackground rounded-lg shadow-lg text-center">
-          <h1 className="text-4xl font-bold text-primaryBlue mb-6">
+        <div className="w-full max-w-lg p-6 bg-white rounded-lg shadow-lg text-center">
+          <h1 className="text-4xl font-normal text-textBlack mb-6">
             Welcome to BBI
           </h1>
           <div className="flex justify-center space-x-4">
             <button
-              className="px-6 py-3 bg-secondaryPink text-white font-semibold rounded-full shadow hover:bg-pink-500"
+              className="px-4 py-2 bg-secondaryPink text-textGray font-semibold rounded-full shadow cursor-pointer"
               onClick={() => handleOpenPopup("login")}
             >
               Login
             </button>
             <button
-              className="px-6 py-3 bg-primaryPink text-white font-semibold rounded-full shadow hover:bg-pink-400"
+              className="px-4 py-2 bg-secondaryPink text-textGray font-semibold rounded-full shadow cursor-pointer"
               onClick={() => handleOpenPopup("signup")}
             >
               Sign Up

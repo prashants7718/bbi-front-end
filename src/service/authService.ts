@@ -1,29 +1,22 @@
+import axios, { AxiosError } from "axios";
 import { getAxiosInstance } from "../config/axiosConfig";
+import { LoginResponse, SignupPayload } from "../types/auth";
 
-interface LoginResponse {
-  token: string;
-}
-interface SignupPayload {
-  email: string;
-  password: string;
-  company: string;
-  username: string;
-}
 const axiosInstance = getAxiosInstance();
 
-export const login = async (
-  username: string,
-  password: string
-): Promise<LoginResponse> => {
+export const login = async (username: string, password: string) => {
   try {
-    console.log("in login api");
-    const response = await axiosInstance.post<LoginResponse>("/login", {
+    const response = await axiosInstance.post("/login", {
       username,
       password,
     });
     return response.data;
-  } catch (error: any) {
-    throw error.response?.data?.message || "An error occurred during login.";
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      throw axiosError.response?.data?.message;
+    }
+    throw new Error("An unexpected error occurred");
   }
 };
 
@@ -31,7 +24,11 @@ export const signUp = async (payload: SignupPayload) => {
   try {
     const response = await axiosInstance.post("/user", payload);
     return response.data;
-  } catch (error: any) {
-    throw error.response?.data?.message || "An error occurred during signup.";
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      throw axiosError.response?.data?.message;
+    }
+    throw new Error("An unexpected error occurred");
   }
 };

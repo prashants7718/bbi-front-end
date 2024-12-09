@@ -10,7 +10,9 @@ import Teams from "./components/manager/Teams";
 import UserManagement from "./components/manager/UserManagement";
 import Home from "./pages/Home";
 import InviteSignup from "./pages/InviteSignup";
-import { getUserDetailsFromToken } from "./utils/getUserRole"; 
+import { getUserDetailsFromToken } from "./utils/getUserRole";
+import Settings from "./components/manager/Settings";
+import { useUserContext } from "./context/UserContext";
 
 const data = [
   { id: 1, name: "ADHD", status: "Not Started", timeRemaining: "5 mins" },
@@ -31,7 +33,7 @@ export const isAuthenticated = (): boolean => {
 
       const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
       if (decodedToken.exp > currentTime) {
-        return true; // Token is valid and not expired
+        return true;
       }
     }
   } catch (error) {
@@ -48,7 +50,6 @@ const ProtectedRoute = (isUserAuthenticated: any) => {
   return <Outlet />;
 };
 const isUserAuthenticated = isAuthenticated();
-const user = getUserDetailsFromToken();
 const router = createBrowserRouter([
   {
     path: "/",
@@ -61,19 +62,19 @@ const router = createBrowserRouter([
     children: [
       {
         path: "dashboard",
-        element: <ManagerDashboard username={user.userName} />,
+        element: <ManagerDashboard />,
       },
       {
         path: "user-management",
-        element: <UserManagement username={user.userName} />,
+        element: <UserManagement />,
       },
       {
         path: "teams",
-        element: <Teams username={user.userName} />,
+        element: <Teams />,
       },
       {
         path: "team/:teamName",
-        element: <TeamMembers username={user.userName} />,
+        element: <TeamMembers />,
       },
     ],
   },
@@ -83,37 +84,29 @@ const router = createBrowserRouter([
     children: [
       {
         path: "dashboard",
-        element: <EmployeeDashboard testData={data} username={user.userName} />,
+        element: <EmployeeDashboard />,
       },
       {
         path: "available-tests",
-        element: (
-          <AvailableTest
-            testData={data}
-            setTestData={data}
-            username={user.userName}
-          />
-        ),
+        element: <AvailableTest />,
       },
       {
         path: "archive",
-        element: <Archive testData={data} username={user.userName} />,
+        element: <Archive />,
       },
       {
         path: "test/:testName",
-        element: (
-          <Assessment
-            testData={data}
-            setTestData={data}
-            username={user.userName}
-          />
-        ),
+        element: <Assessment />,
       },
     ],
   },
   {
     path: "/join/:code",
     element: <InviteSignup />,
+  },
+  {
+    path: "/settings",
+    element: <Settings />,
   },
   {
     path: "*",

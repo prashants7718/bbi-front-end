@@ -1,10 +1,6 @@
+import axios, { AxiosError } from "axios";
 import { getAxiosInstance } from "../config/axiosConfig";
-
-export interface InviteUserPayload {
-  email: string;
-  team: string;
-  company: string;
-}
+import { InviteUserPayload } from "../types/manager";
 
 const axiosInstance = getAxiosInstance();
 
@@ -15,7 +11,12 @@ export const inviteUser = async (
     const response = await axiosInstance.post("/inviteUser", payload);
     return response.data;
   } catch (error) {
-    console.error("Error sending invitation:", error);
-    throw error;
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      throw (
+        axiosError.response?.data?.message || "An error occurred during login."
+      );
+    }
+    throw new Error("An unexpected error occurred");
   }
 };

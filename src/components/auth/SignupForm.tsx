@@ -1,26 +1,38 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signUp } from "../../service/authService";
+import { Roles } from "../../constant/enum";
+import { useUserContext } from "../../context/UserContext";
+import { getUserDetailsFromToken } from "../../utils/getUserRole";
+import { toast } from "react-toastify";
 
 interface SignupFormProps {
-  onClose: () => void;
-  invitationData?: { email: string; company: string; team: string };
+  onClose?: () => void;
+  invitationData?: {
+    email: string;
+    company: string;
+    team: string;
+    role: string;
+  };
 }
 
 const SignupForm: React.FC<SignupFormProps> = ({ onClose, invitationData }) => {
   const navigate = useNavigate();
+  const { userName, handleUser } = useUserContext();
   const [formData, setFormData] = useState({
-    email: invitationData?.email || "",
+    email: invitationData?.email ?? "",
     username: "",
     password: "",
     confirmPassword: "",
-    company: invitationData?.company || "",
+    company: invitationData?.company ?? "",
+    jobTitle: "",
   });
   const [errors, setErrors] = useState({
     email: "",
     username: "",
     password: "",
     confirmPassword: "",
+    jobTitle: "",
   });
   useEffect(() => {
     if (invitationData) {
@@ -31,21 +43,20 @@ const SignupForm: React.FC<SignupFormProps> = ({ onClose, invitationData }) => {
       }));
     }
   }, [invitationData]);
+
+  useEffect(() => {}, [userName]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
   const handleCancel = () => {
     if (location.pathname === "/") {
-      onClose();
+      onClose?.();
     } else {
       navigate("/");
     }
   };
-
-  useEffect(() => {
-    console.log("FormData===", formData);
-  }, [formData]);
 
   const validate = () => {
     const newErrors = {
@@ -59,6 +70,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onClose, invitationData }) => {
         formData.confirmPassword === formData.password
           ? ""
           : "Passwords do not match",
+      // jobTitle: formData.jobTitle ? "" : "Job title is required",
     };
     setErrors(newErrors);
     return !Object.values(newErrors).some((err) => err);
@@ -71,21 +83,31 @@ const SignupForm: React.FC<SignupFormProps> = ({ onClose, invitationData }) => {
         username: formData.username,
         password: formData.password,
         company: formData.company,
+        jobTitle: formData.jobTitle,
       };
       try {
         const response = await signUp(userData);
-        console.log(response.user);
-        const userRole = response.user.role;
-        console.log("response ", response);
-        sessionStorage.setItem("accessToken", response.token)
-        if (userRole === "Manager") {
+        sessionStorage.setItem("accessToken", response.token);
+        const user = getUserDetailsFromToken();
+        handleUser();
+        if (user.role === Roles.MANAGER) {
           navigate("/manager/dashboard");
-        } else if (userRole === "Employee") {
+        } else if (user.role === Roles.EMPLOYEE) {
           navigate("/employee/dashboard");
         }
-        onClose();
+        onClose?.();
       } catch (error) {
-        console.error("Error during signup:", error);
+        const errorMessage =
+          (error as any) ||
+          (error instanceof Error
+            ? error.message
+            : "An unexpected error occurred");
+        toast(errorMessage, {
+          position: "top-center",
+          autoClose: 3000,
+          type: "error",
+          theme: "colored",
+        });
       }
     }
   };
@@ -123,7 +145,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onClose, invitationData }) => {
             <input
               type="text"
               name="username"
-              value={formData.username.trim()}
+              value={formData.username?.trim()}
               onChange={handleChange}
               placeholder={"Create a username"}
               className={`w-full px-4 py-1 h-9 border text-sm ${
@@ -141,7 +163,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onClose, invitationData }) => {
             <input
               type="password"
               name="password"
-              value={formData.password.trim()}
+              value={formData.password?.trim()}
               onChange={handleChange}
               placeholder={"Create a password"}
               className={`w-full px-4 py-1 h-9 border text-sm ${
@@ -158,7 +180,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onClose, invitationData }) => {
             <input
               type="password"
               name="confirmPassword"
-              value={formData.confirmPassword.trim()}
+              value={formData.confirmPassword?.trim()}
               onChange={handleChange}
               placeholder="Re-enter your password"
               className={`w-full px-4 py-1 h-9 border text-sm ${
@@ -175,7 +197,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onClose, invitationData }) => {
             <input
               type="text"
               name="company"
-              value={formData.company.trim()}
+              value={formData.company?.trim()}
               onChange={handleChange}
               placeholder={"Enter your company name"}
               readOnly={!!invitationData}
@@ -184,6 +206,20 @@ const SignupForm: React.FC<SignupFormProps> = ({ onClose, invitationData }) => {
               } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
           </div>
+          {invitationData && invitationData.role && (
+            <div>
+              <input
+                type="text"
+                name="jobTitle"
+                value={formData.jobTitle.trim()}
+                onChange={handleChange}
+                placeholder={"Enter your Job Title"}
+                className={`w-full px-4 py-1 h-9 border text-sm ${
+                  errors.username ? "border-red-500" : "border-gray-300"
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              />
+            </div>
+          )}
         </div>
         <div className="flex justify-between gap-4 mt-6 ">
           <button

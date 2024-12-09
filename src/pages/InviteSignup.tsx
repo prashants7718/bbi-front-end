@@ -11,12 +11,10 @@ const InviteSignup = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    console.log("verificationCode", verificationCode);
     const validateCode = async () => {
       try {
         const response = await verifyUser({ code: verificationCode });
-        console.log({ response });
-        setInvitationData(response);
+        setInvitationData(response.user);
       } catch (err: any) {
         setError(err.message);
       }

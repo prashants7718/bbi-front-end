@@ -1,40 +1,39 @@
-import { faCaretDown, faUser } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import ProfileMenu from "../../pages/ProfileMenu";
 import { isAuthenticated } from "../../utils/authentication";
-import { getUserDetailsFromToken } from "../../utils/getUserRole";
-const Header = () => {
+
+interface HeaderProps {
+  showLogo?: boolean; // Optional prop to show the logo
+}
+
+const Header: React.FC<HeaderProps> = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const navigate = useNavigate();
+  const location = useLocation();
   const toggleDropdown = () => {
     setIsDropdownOpen((prev) => !prev);
   };
-  const user = getUserDetailsFromToken();
-  const handleNavigation = () => {
-    if (user.role === "Employee") {
-      navigate("/employee/dashboard");
-    } else if (user.role === "Manager") {
-      navigate("/manager/dashboard");
-    }
-  };
+
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
-      <div className="px-4 py-4 flex justify-between items-center ml-2 mr-8">
-        <div className="flex items-center">
-          <button onClick={handleNavigation} className="focus:outline-none">
-            <img src="/logo.png" alt="Logo" className="w-20" />
-          </button>
-        </div>
+    <header className="bg-white shadow-bbiHeaderShadow sticky top-0 z-50 max-h-[70px] h-full flex items-center py-4 px-6">
+      {location.pathname === "/" && (
+        <button className="focus:outline-none">
+          <img src="/logo.png" alt="Logo" className="w-20" />
+        </button>
+      )}
+      <div className="flex justify-end items-center ml-auto">
         {isAuthenticated() && (
           <div className="relative">
             <button
-              className="flex space-x-2 text-pink-300"
+              className="flex space-x-1 text-secondaryPink"
               onClick={toggleDropdown}
             >
-              <FontAwesomeIcon icon={faUser} />
-              <FontAwesomeIcon icon={faCaretDown} />
+              <i className="ri-user-line" style={{ fontSize: "20px" }}></i>
+
+              <i
+                className="ri-arrow-down-s-fill"
+                style={{ fontSize: "20px" }}
+              ></i>
             </button>
             {isDropdownOpen && <ProfileMenu />}
           </div>

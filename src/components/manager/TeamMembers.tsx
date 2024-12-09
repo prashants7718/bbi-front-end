@@ -1,11 +1,11 @@
-import { faEllipsisVertical } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Employees } from "../../constant/employees";
-import Layout from "../layout/Layout";
+import { getSpecificTeam, Team } from "../../service/teamService";
 import { getTeamMembers, removeTeamFromUser } from "../../service/userService";
-import { getSpecificTeam } from "../../service/teamService";
+import Layout from "../layout/Layout";
+import { useUserContext } from "../../context/UserContext";
+import { toast } from "react-toastify";
+import { EmployeeRecord } from "../../types/manager";
 
 interface User {
   username: string;
@@ -15,35 +15,38 @@ interface User {
   local: object;
   role: string;
   team: string;
+  jobTitle: string;
 }
 
 const TeamMembers = () => {
-  const { teamName } = useParams();
-  // const teamMembers = Employees.filter((emp) => emp.Team === teamName);
-  const [teamMembers, setTeamMembers] = useState<User[] | null>(null)
+  const { teamName } = useParams<{ teamName: string }>();
+  const { userName } = useUserContext();
+  const [teamMembers, setTeamMembers] = useState<EmployeeRecord[]>([]);
   const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
-  const [selectedTeam, setSelectedTeam] = useState<string>("");
-  const [selectedMember, setSelectedMember] = useState(null);
+  // const [selectedTeam, setSelectedTeam] = useState<string>("");
+  const [selectedMember, setSelectedMember] = useState<User>();
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-  const [currentTeam, setCurrentTeam] = useState(null)
+  const [currentTeam, setCurrentTeam] = useState<Team>();
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const getTeamMember = async () => {
-    const result = await getTeamMembers(teamName)
-    const response = await getSpecificTeam(teamName)
-    setCurrentTeam(response)
-    setTeamMembers(result)
-    console.log(result)
-  }
-
+    if (!teamName) {
+      return;
+    }
+    const result = await getTeamMembers(teamName);
+    const response = await getSpecificTeam(teamName);
+    setCurrentTeam(response);
+    setTeamMembers(result);
+  };
+  useEffect(() => {
+  }, [currentTeam, teamMembers]);
   const handleEllipsisClick = (member) => {
-    console.log("member", member);
     setSelectedMember(member);
-    setSelectedTeam("");
+    // setSelectedTeam("");
     setIsDropdownVisible((prev) => !prev);
   };
   useEffect(() => {
-    getTeamMember()
+    getTeamMember();
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
@@ -52,45 +55,52 @@ const TeamMembers = () => {
         setIsDropdownVisible(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
   const handleRemoveOption = () => {
-    console.log("Remove option clicked for", selectedMember);
     setIsRemoveModalOpen(true);
     setIsDropdownVisible(false);
   };
-
+  useEffect(() => {}, [userName]);
   if (!teamMembers?.length) {
     return <p>No members found for this team.</p>;
   }
 
-  const handleRemoveFromTeam = async(): void => {
+  const handleRemoveFromTeam = async (): void => {
+    if (!teamName) {
+      return;
+    }
     if (selectedMember) {
-      const result = await removeTeamFromUser(selectedMember.username, teamName)
-      console.log(result)
-      alert(`Removed from team ${selectedTeam}`);
+      await removeTeamFromUser(selectedMember.username, teamName);
+      toast(`Successfully removed from the Team`, {
+        position: "top-center",
+        autoClose: 3000,
+        type: "success",
+        theme: "colored",
+      });
       setIsRemoveModalOpen(false);
+      getTeamMember();
     }
   };
 
   return (
     <Layout>
-      <div className="mt-6 bg-primaryPink p-6 shadow-lg rounded-lg">
-        <h3 className="text-2xl font-bold text-secondaryPink mb-4">
-          Team {currentTeam.name}
-        </h3>
+      <div className="flex-1 bg-white shadow-bbiCardShadow rounded-lg bb-tbl">
+        <div className="heading-text p-4 flex items-center justify-between gap-4">
+          <h2 className="text-xl font-semibold text-textBlack">
+            Team {currentTeam?.name}
+          </h2>
+        </div>
         <table className="w-full text-left border-collapse">
           <thead>
-          <tr className="text-secondaryPink bg-white">
+            <tr className="text-secondaryPink bg-white">
               <th className="border-b p-3">Name</th>
               <th className="border-b p-3">Role</th>
               <th className="border-b p-3">Job Title</th>
-              <th className="border-b p-3"></th>
+              <th className="border-b p-3 w-32 text-center">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -98,24 +108,28 @@ const TeamMembers = () => {
               <tr key={index}>
                 <td className="border-b p-3">{member.username}</td>
                 <td className="border-b p-3">{member.role}</td>
-                <td className="border-b p-3">{member.email}</td>
-                <td className="border-b p-3 cursor-pointer relative">
-                  <button onClick={() => handleEllipsisClick(member)}>
-                    <FontAwesomeIcon icon={faEllipsisVertical} size="sm" />
+                <td className="border-b p-3">{member.jobTitle}</td>
+                <td className="border-b p-3 cursor-pointer relative text-center">
+                  <button
+                    className="flex items-center justify-center w-8 h-8 rounded-full mx-auto hover:bg-grayBackground"
+                    onClick={() => handleEllipsisClick(member)}
+                  >
+                    <i className="ri-more-2-fill"></i>
                   </button>
-                  {isDropdownVisible && selectedMember === member && (
-                    <div
-                      ref={dropdownRef}
-                      className="absolute right-0 mt-2 w-40 bg-white shadow-lg text-sm rounded-md border z-40"
-                    >
-                      <button
-                        onClick={handleRemoveOption}
-                        className="w-full px-4 py-2 flex items-center justify-between border-b border-gray-200 text-primaryBlue"
+                  {isDropdownVisible &&
+                    selectedMember?.username === member.username && (
+                      <div
+                        ref={dropdownRef}
+                        className="absolute right-0 mt-2 w-40 bg-white shadow-lg text-sm rounded-md border z-40"
                       >
-                        Remove
-                      </button>
-                    </div>
-                  )}
+                        <button
+                          onClick={handleRemoveOption}
+                          className="w-full px-4 py-2 flex items-center justify-between border-b border-gray-200 text-primaryBlue"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    )}
                 </td>
               </tr>
             ))}
@@ -126,7 +140,8 @@ const TeamMembers = () => {
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
           <div className="bg-white w-1/4 rounded-lg p-6 shadow-lg">
             <h3 className="text-xl font-bold mb-4 text-primaryBlue">
-              Are you sure you want to remove {selectedMember?.username} from Team?
+              Are you sure you want to remove {selectedMember?.username} from
+              Team?
             </h3>
 
             <div className="flex justify-end space-x-4">

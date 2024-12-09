@@ -1,5 +1,7 @@
-import { useState } from "react";
-import { Employees } from "../../constant/employees";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import { useUserContext } from "../../context/UserContext";
+import { getGeneratedTeam, getJobProfiles } from "../../service/userService";
 
 interface Row {
   id: string;
@@ -8,15 +10,17 @@ interface Row {
 }
 
 export default function TeamMatching() {
+  const { userName } = useUserContext();
   const [rows, setRows] = useState<Row[]>([
     { id: `${new Date().getTime()}`, teamSize: 1, jobTitle: "" },
   ]);
-  const jobTitles: string[] = [
-    ...new Set(Employees.map((employee) => employee.JobTitle)),
-  ];
+
+  const [selectedJobTitles, setSelectedJobTitles] = useState<string[]>([]);
   const [generatedTeam, setGeneratedTeam] = useState<any[]>([]);
-  const [isTeamGeneration, setIsTeamGeneration] = useState<boolean>(false);
-  const [showTeam, setShowTeam] = useState(false);
+  // const [isTeamGeneration, setIsTeamGeneration] = useState<boolean>(false);
+  // const [showTeam, setShowTeam] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+
   const addRow = () => {
     setRows([
       ...rows,
@@ -36,163 +40,81 @@ export default function TeamMatching() {
     setRows(updatedRows);
   };
 
-  const calculateTotalTeamMembers = () => {
-    return rows.reduce((total, row) => total + row.teamSize, 0);
-  };
-  const calculateDistance = (vectorA: number[], vectorB: number[]): number => {
-    if (vectorA.length !== vectorB?.length) {
-      throw new Error("Vectors must be of the same length");
-    }
-    const distance = Math.sqrt(
-      vectorA.reduce((sum, value, index) => {
-        return sum + Math.pow(value - vectorB[index], 2);
-      }, 0)
-    );
-
-    return distance;
-  };
-  const findClosestMatch = (
-    userScores: number[],
-    otherUsers: User[]
-  ): { user: User | null; distance: number } => {
-    return otherUsers.reduce(
-      (bestMatch, currentUser) => {
-        console.log({ currentUser });
-        const distance = calculateDistance(userScores, currentUser.scores);
-
-        if (distance < bestMatch.distance) {
-          return { user: currentUser, distance };
-        }
-
-        return bestMatch;
-      },
-      { user: null, distance: Infinity }
-    );
-  };
-  const calculateAverageScores = (members: any[]): number[] => {
-    const scoresLength = members[0]?.scores?.length || 0;
-    return Array(scoresLength)
-      .fill(0)
-      .map((_, i) => {
-        return (
-          members.reduce((sum, member) => sum + member.scores[i], 0) /
-          members.length
-        );
-      });
-  };
-  const buildTeam = (
-    requirements: any[],
-    candidates: any[],
-    initialTeamMembers: any[]
-  ) => {
-    const team: any[] = [];
-    // const team = [];
-    requirements.forEach((role) => {
-      const { teamSize, jobTitle } = role;
-      const filteredCandidates = candidates.filter(
-        (candidate) => candidate.JobTitle === jobTitle
-      );
-
-      let selectedCount = 0;
-      const avgTeamScores = calculateAverageScores(filteredCandidates);
-      while (selectedCount < teamSize && filteredCandidates.length > 0) {
-        const bestMatch = findClosestMatch(avgTeamScores, filteredCandidates);
-
-        if (bestMatch.user) {
-          team.push(bestMatch.user);
-          selectedCount++;
-          const userIndex = filteredCandidates.indexOf(bestMatch.user);
-          filteredCandidates.splice(userIndex, 1);
-        } else {
-          break;
-        }
-      }
+  const generateTeam = async () => {
+    const constraints = rows.map((row) => {
+      return {
+        name: row.jobTitle,
+        count: row.teamSize,
+      };
     });
-    return team;
+
+    const result = await getGeneratedTeam(userName, constraints);
+    toast("Team Generated successfully", {
+      position: "top-center",
+      autoClose: 3000,
+      type: "success",
+      theme: "colored",
+    });
+    setGeneratedTeam(result?.[0]?.assigned);
+    // setIsTeamGeneration(false);
+    // setShowTeam(true);
+    setShowModal(false);
   };
-  const generateTeam = () => {
-    const team: any[] = [];
-    const remainingEmployees = [...Employees];
-    const getteam = buildTeam(rows, remainingEmployees);
-
-    console.log(getteam);
-    // for (const row of rows) {
-    //   const { teamSize, jobTitle } = row;
-    //   if (jobTitle) {
-    //     const employeesForJob = remainingEmployees.filter(
-    //       (employee) => employee.JobTitle === jobTitle
-    //     );
-
-    //     const selectedEmployees = employeesForJob.slice(0, teamSize);
-
-    //     for (const selected of selectedEmployees) {
-    //       const index = remainingEmployees.findIndex(
-    //         (employee) => employee.Name === selected.Name
-    //       );
-    //       if (index > -1) remainingEmployees.splice(index, 1);
-    //     }
-
-    //     team.push(...selectedEmployees);
-
-    //     if (selectedEmployees.length < teamSize) {
-    //       console.warn(
-    //         `Not enough ${jobTitle}s available. Requested: ${teamSize}, Available: ${selectedEmployees.length}`
-    //       );
-    //     }
-    //   }
-    // }
-    setGeneratedTeam(getteam);
-    setIsTeamGeneration(false);
-    setShowTeam(true);
+  const clearTable = () => {
+    setGeneratedTeam([]);
+    setRows([
+      {
+        id: `${new Date().getTime()}`,
+        teamSize: 1,
+        jobTitle: "",
+      },
+    ]);
   };
+
+  const getAllJobProfiles = async () => {
+    const result = await getJobProfiles(userName);
+    setSelectedJobTitles(result);
+  };
+
+  useEffect(() => {
+    getAllJobProfiles();
+  }, [userName]);
 
   return (
-    <div className="flex-1">
-      <h2 className="text-3xl font-bold text-secondaryPink mb-2">
-        Team Matching
-      </h2>
-      <div className="flex gap-4">
-        <button
-          className="p-1 px-2 bg-secondaryPink text-white rounded shadow hover:bg-secondaryPink"
-          onClick={() => {
-            setIsTeamGeneration(true);
-          }}
-        >
-          Create Team
-        </button>
-        {isTeamGeneration && (
+    <div className="flex-1 bg-white shadow-bbiCardShadow rounded-lg bb-tbl">
+      <div className="heading-text p-4 flex items-center justify-between gap-4">
+        <h2 className="text-xl font-semibold text-textBlack">Team Matching</h2>
+        {generatedTeam.length === 0 ? (
           <button
-            className="px-4 py-1 bg-gray-400 text-gray-800 rounded hover:bg-gray-400"
-            onClick={() => {
-              setRows([
-                { id: `${new Date().getTime()}`, teamSize: 1, jobTitle: "" },
-              ]);
-              setIsTeamGeneration(false);
-              setShowTeam(false);
-            }}
+            className="py-1 px-5  h-9 bg-secondaryPink text-textBlack rounded shadow hover:bg-secondaryPink"
+            onClick={() => setShowModal(true)}
           >
-            Cancel
+            Match Team
+          </button>
+        ) : (
+          <button
+            className="px-4 py-1 bg-secondaryPink text-white rounded"
+            onClick={clearTable}
+          >
+            Clear Table
           </button>
         )}
       </div>
-      {isTeamGeneration && (
-        <>
-          <div className="flex flex-col bg-primaryPink p-4 shadow-lg rounded-lg justify-around mt-4 space-y-2">
-            {rows.map((row, i) => (
-              <div
-                key={row.id}
-                className="flex bg-primaryPink p-2 items-center space-x-20"
-              >
-                <div className="mb-6 w-56">
-                  <label className="block text-sm font-semibold mb-2">
-                    Select number of team members:
-                  </label>
+      {showModal && (
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center overflow-auto">
+          <div className="bg-white p-4 rounded shadow-lg max-w-xl w-full">
+            <h3 className="text-lg font-normal mb-4 text-textBlack">
+              Create Team
+            </h3>
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              {rows.map((row) => (
+                <div key={row.id} className="flex items-center space-x-4">
                   <select
                     value={row.teamSize}
                     onChange={(e) =>
                       updateRow(row.id, "teamSize", Number(e.target.value))
                     }
-                    className="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primaryBlue"
+                    className="w-32 p-1 h-9 border rounded bg-white"
                   >
                     {[1, 2, 3, 4, 5].map((size) => (
                       <option key={size} value={size}>
@@ -200,84 +122,88 @@ export default function TeamMatching() {
                       </option>
                     ))}
                   </select>
-                </div>
-                <div className="mb-6 w-56">
-                  <label className="block text-sm font-semibold mb-2">
-                    Select job title:
-                  </label>
                   <select
                     value={row.jobTitle}
                     onChange={(e) =>
                       updateRow(row.id, "jobTitle", e.currentTarget.value)
                     }
-                    className="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primaryBlue"
+                    className="flex-1 p-1 h-9 border rounded bg-white"
                   >
                     <option value="" disabled>
-                      Select a job
+                      Select Job Title
                     </option>
-                    {jobTitles.map((title) => (
+                    {selectedJobTitles?.map((title) => (
                       <option key={title} value={title}>
                         {title}
                       </option>
                     ))}
                   </select>
-                </div>
-                {rows.length === i + 1 ? (
                   <button
-                    disabled={row.jobTitle.length === 0}
-                    className="flex items-center justify-center w-10 h-10 rounded-full bg-primaryBlue text-white text-2xl"
-                    onClick={addRow}
-                  >
-                    +
-                  </button>
-                ) : (
-                  <button
-                    className="flex items-center justify-center w-10 h-10 rounded-full bg-secondaryPink text-white text-2xl"
+                    className="p-1 rounded"
                     onClick={() => removeRow(row.id)}
                   >
-                    -
+                    <i className="ri-close-circle-line text-xl"></i>
                   </button>
-                )}
+                </div>
+              ))}
+              <div className="space-x-4">
+                <button
+                  className="px-2 py-1 bg-blueBackground text-white rounded text-sm"
+                  onClick={addRow}
+                >
+                  Add Role
+                </button>
               </div>
-            ))}
+            </div>
+            <div className="flex justify-end space-x-4 mt-3 text-sm">
+              <button
+                className="px-4 py-1 bg-darkGrayBackground text-textBlack rounded"
+                onClick={() => {
+                  setShowModal(false);
+                  setRows([
+                    {
+                      id: `${new Date().getTime()}`,
+                      teamSize: 1,
+                      jobTitle: "",
+                    },
+                  ]);
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-2 bg-secondaryPink text-textBlack rounded"
+                onClick={generateTeam}
+              >
+                Generate Team
+              </button>
+            </div>
           </div>
-          <div className="mt-6 flex justify-between items-center">
-            <h3 className="text-xl font-bold">
-              Total Team Members: {calculateTotalTeamMembers()}
-            </h3>
-            <button
-              className="px-6 py-3 bg-secondaryPink text-white font-semibold rounded-full shadow hover:bg-secondaryPink"
-              onClick={() => {
-                generateTeam();
-              }}
-            >
-              Generate Team
-            </button>
-          </div>
-        </>
+        </div>
       )}
-
-      {showTeam && generatedTeam.length > 0 && (
-        <div className="mt-6 bg-primaryPink p-4 shadow-lg rounded-lg ">
-          <h3 className="text-xl font-bold mb-4 text-secondaryPink">
-            Generated Team Members:
-          </h3>
+      {generatedTeam.length > 0 && (
+        <div className="flex-1 bb-tbl">
+          <div className="flex items-center justify-between pb-3">
+            <div className="flex items-center px-4 justify-between gap-4">
+              <h2 className="text-md font-medium text-textBlack">
+                Generated Team Members
+              </h2>
+            </div>
+          </div>
           <table className="min-w-full table-auto">
             <thead>
               <tr className="text-secondaryPink bg-white">
                 <th className="px-4 py-2 text-left">Name</th>
                 <th className="px-4 py-2 text-left">Job Title</th>
-                <th className="px-4 py-2 text-left">Team</th>
-                <th className="px-4 py-2 text-left">Role</th>
+                <th className="px-4 py-2 text-left">Score</th>
               </tr>
             </thead>
             <tbody>
               {generatedTeam.map((member) => (
                 <tr key={member.Name} className="border-t">
-                  <td className="px-4 py-2">{member.Name}</td>
-                  <td className="px-4 py-2 text-gray-600">{member.JobTitle}</td>
-                  <td className="px-4 py-2 text-gray-600">{member.Team}</td>
-                  <td className="px-4 py-2 text-gray-600">{member.Role}</td>
+                  <td className="px-4 py-2">{member.username}</td>
+                  <td className="px-4 py-2">{member.jobTitle}</td>
+                  <td className="px-4 py-2">{member.scores.toString()}</td>
                 </tr>
               ))}
             </tbody>

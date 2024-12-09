@@ -1,43 +1,57 @@
+import axios, { AxiosError } from "axios";
 import { getAxiosInstance } from "../config/axiosConfig";
 
 const axiosInstance = getAxiosInstance();
 
 interface TeamResponse {
-    data: Team;
+  data: Team;
 }
 
-interface Team {
-    _id: string;
-    name: string;
-    username: string
+export interface Team {
+  _id: string;
+  name: string;
+  username: string;
+  company: string;
+}
+export interface NewTeam {
+  _id: string;
+  name: string;
+  username: string;
+  company: string;
 }
 
-export const getSpecificTeam = async (
-    team: string
-  ): Promise<Team> => {
-    try {
-      const response = await axiosInstance.post<TeamResponse>(`http://localhost:3000/getTeam`, {
-        team
-      });
-      console.log(response.data)
-      return response.data;
-    } catch (error: any) {
-      throw error.response?.data?.message || "An error occurred during login.";
+export const getSpecificTeam = async (team: string): Promise<Team> => {
+  try {
+    const response = await axiosInstance.post<Team>("/getTeam", {
+      team,
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      throw (
+        axiosError.response?.data?.message || "An error occurred during login."
+      );
     }
+    throw new Error("An unexpected error occurred");
+  }
 };
 
-export const getAllTeamOfManager = async (
-    username: string
-  ): Promise<Team> => {
-    try {
-      const response = await axiosInstance.post<TeamResponse>(`http://localhost:3000/getTeam`, {
-        username
-      });
-      console.log(response.data)
-      return response.data;
-    } catch (error: any) {
-      throw error.response?.data?.message || "An error occurred during login.";
+export const getAllTeamOfManager = async (username: string): Promise<Team> => {
+  try {
+    const response = await axiosInstance.post<TeamResponse>("/getTeam", {
+      username,
+    });
+    return response.data.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      throw (
+        axiosError.response?.data?.message || "An error occurred during login."
+      );
     }
+    throw new Error("An unexpected error occurred");
+  }
 };
 
 export const createAndAssignTeamWithEmployees = async (
@@ -45,30 +59,68 @@ export const createAndAssignTeamWithEmployees = async (
   company: string,
   username: string,
   employees: string[]
-): Promise<Team> => {
+) => {
   try {
-    const response = await axiosInstance.post<TeamResponse>(`http://localhost:3000/createTeamWithEmployees`, {
-      name, company, username, employees
-    });
-    console.log(response.data)
-    return response.data;
-  } catch (error: any) {
-    throw error.response?.data?.message || "An error occurred during login.";
+    const response = await axiosInstance.post<TeamResponse>(
+      `/createTeamWithEmployees`,
+      {
+        name,
+        company,
+        username,
+        employees,
+      }
+    );
+    return response.data.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      throw (
+        axiosError.response?.data?.message ||
+        "An error occurred while creating Team."
+      );
+    }
+    throw new Error("An unexpected error occurred");
   }
 };
 
-export const getSortedTeamsWithName = async (
-  username: string,
-  id: string
-): Promise<Team> => {
+export const getSortedTeamsWithName = async (username: string, id: string) => {
   try {
-    const response = await axiosInstance.post<TeamResponse>(`http://localhost:3000/getSortedTeamById`, {
-      username, id
+    const response = await axiosInstance.post("/getSortedTeamById", {
+      username,
+      id,
     });
-    console.log(response.data)
     return response.data;
-  } catch (error: any) {
-    throw error.response?.data?.message || "An error occurred during login.";
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      throw (
+        axiosError.response?.data?.message || "An error occurred during login."
+      );
+    }
+    throw new Error("An unexpected error occurred");
   }
 };
-  
+
+export const createNewTeam = async (
+  name: string,
+  company: string,
+  username: string
+): Promise<Team> => {
+  try {
+    const response = await axiosInstance.post<TeamResponse>("/createTeam", {
+      name,
+      company,
+      username,
+    });
+    return response.data.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      throw (
+        axiosError.response?.data?.message ||
+        "An error occurred during creating team."
+      );
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};

@@ -14,7 +14,7 @@ const Popup: React.FC<PopupProps> = ({ isOpen, onClose, children }) => {
     <Modal
       isOpen={isOpen}
       onRequestClose={onClose}
-      className="bg-white max-w-lg mx-auto p-6 rounded-lg shadow-lg outline-none"
+      className="bg-white max-w-xl mx-auto p-6 rounded-lg shadow-lg outline-none"
       overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
     >
       {children}

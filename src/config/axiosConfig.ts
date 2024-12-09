@@ -1,4 +1,5 @@
 import axios, { CreateAxiosDefaults } from "axios";
+import { toast } from "react-toastify";
 
 export const getAxiosInstance = () => {
   const defaultOptions: CreateAxiosDefaults = {
@@ -10,14 +11,14 @@ export const getAxiosInstance = () => {
     if (accessToken) {
       request.headers.Authorization = `Bearer ${accessToken}`;
     }
-    console.log(request);
     return request;
   });
   axiosInstance.interceptors.response.use(
-    (response) => response,
+    (response) => {
+      return response;
+    },
     (error) => {
       if (error.response?.status === 401) {
-        console.error("Unauthorized access - token expired");
         window.location.href = "/";
       }
       return Promise.reject(error);

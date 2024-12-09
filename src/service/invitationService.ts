@@ -1,3 +1,4 @@
+import axios, { AxiosError } from "axios";
 import { getAxiosInstance } from "../config/axiosConfig";
 
 interface VerifyUser {
@@ -14,7 +15,13 @@ export const verifyUser = async (verificationCode: VerifyUser) => {
     );
     return response.data;
   } catch (error) {
-    console.error("Error sending invitation:", error);
-    throw error;
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      throw (
+        axiosError.response?.data?.message ||
+        "An error occurred during verification."
+      );
+    }
+    throw new Error("An unexpected error occurred");
   }
 };

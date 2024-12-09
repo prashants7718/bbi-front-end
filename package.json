@@ -10,9 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^6.7.1",
-    "@fortawesome/free-solid-svg-icons": "^6.7.1",
-    "@fortawesome/react-fontawesome": "^0.2.2",
     "@react-email/components": "^0.0.28",
     "@sendgrid/mail": "^8.1.4",
     "axios": "^1.7.8",
@@ -24,7 +21,9 @@
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.3.1",
     "react-modal": "^3.16.1",
-    "react-router-dom": "^6.28.0"
+    "react-router-dom": "^6.28.0",
+    "react-toastify": "^10.0.6",
+    "remixicon": "^4.5.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
